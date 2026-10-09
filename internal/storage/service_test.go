@@ -24,3 +24,10 @@ func TestSummaryBoundedUTF8(t *testing.T) {
 		t.Fatal("short diagnostic changed")
 	}
 }
+
+func TestSummaryRedactsGitHubToken(t *testing.T) {
+	s := Service{policy: config.StorageConfig{DiagnosticBytes: 256}, githubToken: "secret-token"}
+	if got := s.Summary("request failed: secret-token"); strings.Contains(got, "secret-token") || !strings.Contains(got, "[redacted]") {
+		t.Fatal("token was not redacted")
+	}
+}

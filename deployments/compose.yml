@@ -16,6 +16,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:?Set an isolated staging database URL}
       ADMIN_DEFAULT_USER: ${ADMIN_DEFAULT_USER:-admin}
       ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:?Set initial admin password}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       APP_PORT: '8089'
       SNAPSHOT_DIR: /app/snapshots
       VALIDATION_WORKSPACE_DIR: /tmp/gostarter-validation

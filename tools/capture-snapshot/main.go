@@ -39,7 +39,7 @@ func run() error {
 		return err
 	}
 	defer repository.Close()
-	service, err := storage.New(repository, cfg.Storage)
+	service, err := storage.New(repository, cfg.Storage, cfg.Upstream.GitHubToken)
 	if err != nil {
 		return err
 	}

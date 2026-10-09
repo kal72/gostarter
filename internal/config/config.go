@@ -79,9 +79,10 @@ type DatabaseConfig struct {
 
 // UpstreamConfig holds reference architecture source repository settings
 type UpstreamConfig struct {
-	Owner  string `json:"owner"`
-	Repo   string `json:"repo"`
-	Branch string `json:"branch"`
+	Owner       string `json:"owner"`
+	Repo        string `json:"repo"`
+	Branch      string `json:"branch"`
+	GitHubToken string `json:"-"`
 }
 
 // GetDSN returns the constructed connection string or explicit DSN
@@ -129,6 +130,7 @@ func Load(envFile string) (*Config, error) {
 	v.SetDefault("UPSTREAM_OWNER", "kal72")
 	v.SetDefault("UPSTREAM_REPO", "go-feature-based-boilerplate")
 	v.SetDefault("UPSTREAM_BRANCH", "main")
+	v.SetDefault("GITHUB_TOKEN", "")
 
 	v.SetDefault("ADMIN_DEFAULT_USER", "admin")
 	v.SetDefault("ADMIN_DEFAULT_PASSWORD", "admin123")
@@ -229,9 +231,10 @@ func Load(envFile string) (*Config, error) {
 			ConnMaxLifetime: v.GetDuration("DB_CONN_MAX_LIFETIME"),
 		},
 		Upstream: UpstreamConfig{
-			Owner:  v.GetString("UPSTREAM_OWNER"),
-			Repo:   v.GetString("UPSTREAM_REPO"),
-			Branch: v.GetString("UPSTREAM_BRANCH"),
+			Owner:       v.GetString("UPSTREAM_OWNER"),
+			Repo:        v.GetString("UPSTREAM_REPO"),
+			Branch:      v.GetString("UPSTREAM_BRANCH"),
+			GitHubToken: v.GetString("GITHUB_TOKEN"),
 		},
 		Admin: AdminConfig{
 			DefaultUser:     v.GetString("ADMIN_DEFAULT_USER"),

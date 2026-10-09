@@ -299,3 +299,28 @@ See [application architecture](docs/application-architecture.md) for startup own
 ### Web UI stack
 
 The UI uses Chi, templ, HTMX, Alpine.js, and locally compiled Tailwind CSS. `make start` builds the frontend and starts the single application process. Use `make ui` after editing templates or styles. See [web stack and build ownership](docs/web-stack.md).
+
+### GitHub API authentication and Sync limits
+
+Set `GITHUB_TOKEN` in the server environment or `.env` to authenticate GitHub API
+requests during upstream Sync. Leave it empty to use unauthenticated requests.
+Restart the server after changing it. Docker Compose also forwards this variable.
+For GitHub Actions deployment, add the optional repository Actions secret
+`UPSTREAM_GITHUB_TOKEN`; the deployment workflow writes it as `GITHUB_TOKEN` in
+the server environment file. Alternatively, put `GITHUB_TOKEN=...` inside the
+existing `ENV_DEV` / `ENV_PROD` secret. The dedicated secret takes precedence when
+nonempty; when absent, the environment-file value is preserved. If both are empty,
+Sync uses unauthenticated requests. The workflow's built-in `secrets.GITHUB_TOKEN`
+is used only for GHCR authentication, never as the persistent server credential.
+The token is server-only, excluded from configuration JSON, and redacted from
+stored diagnostics. Archive downloads continue to use the public upstream URL.
+
+When GitHub returns a rate limit response (403/429), the admin Sync error displays
+`Retry Sync after YYYY-MM-DD HH:MM:SS UTC`, based on `X-RateLimit-Reset` for an
+exhausted primary quota and/or `Retry-After`. When both apply, the later time is
+used. If neither header provides a usable time, the message says the reset time
+is unavailable. Other permission failures are not reported as rate limits; an
+invalid token produces an authentication message. Sync remains manual, with no
+automatic retry. After the displayed time, click Sync again.
+
+See [GitHub rate-limit documentation](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).

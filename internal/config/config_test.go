@@ -1,7 +1,10 @@
 package config_test
 
 import (
+	"encoding/json"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"gostarter/internal/config"
@@ -121,5 +124,30 @@ func TestStorageConfigLimits(t *testing.T) {
 				t.Fatalf("accepted %s=%s", key, value)
 			}
 		})
+	}
+}
+
+func TestGitHubTokenConfiguration(t *testing.T) {
+	file := filepath.Join(t.TempDir(), ".env")
+	if err := os.WriteFile(file, []byte("GITHUB_TOKEN=file-token\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := config.Load(file)
+	if err != nil || cfg.Upstream.GitHubToken != "file-token" {
+		t.Fatalf("file token not loaded: %v", err)
+	}
+	t.Setenv("GITHUB_TOKEN", "env-token")
+	cfg, err = config.Load(file)
+	if err != nil || cfg.Upstream.GitHubToken != "env-token" {
+		t.Fatalf("env token not loaded: %v", err)
+	}
+	body, err := json.Marshal(cfg)
+	if err != nil || strings.Contains(string(body), "env-token") {
+		t.Fatal("token exposed in JSON")
+	}
+	t.Setenv("GITHUB_TOKEN", "")
+	cfg, err = config.Load(filepath.Join(t.TempDir(), "missing.env"))
+	if err != nil || cfg.Upstream.GitHubToken != "" {
+		t.Fatalf("empty token must be allowed: %v", err)
 	}
 }

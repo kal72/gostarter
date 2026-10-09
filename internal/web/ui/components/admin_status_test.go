@@ -30,3 +30,14 @@ func TestSyncButtonTracksQueueAndLease(t *testing.T) {
 		})
 	}
 }
+
+func TestAdminDisplaysSyncRetryTime(t *testing.T) {
+	message := "GitHub API rate limit exceeded. Retry Sync after 2027-01-15 08:02:00 UTC."
+	var output strings.Builder
+	if err := SnapshotList(ui.Source{SyncError: message}).Render(context.Background(), &output); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output.String(), message) {
+		t.Fatal("admin status did not display retry time")
+	}
+}

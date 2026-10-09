@@ -28,7 +28,7 @@ func Run(ctx context.Context, cfg *config.Config, options Options) error {
 	if options.MigrateOnly {
 		return nil
 	}
-	store, err := storage.New(repository, cfg.Storage)
+	store, err := storage.New(repository, cfg.Storage, cfg.Upstream.GitHubToken)
 	if err != nil {
 		return fmt.Errorf("initialize storage: %w", err)
 	}

@@ -182,13 +182,15 @@ jobs:
           HOST_PORT: ${{ needs.build-and-push.outputs.host_port }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Persistent runtime credential; the Actions GITHUB_TOKEN expires after the job.
+          UPSTREAM_GITHUB_TOKEN: ${{ secrets.UPSTREAM_GITHUB_TOKEN }}
           ENV_SECRET: ${{ inputs.environment == 'prod' && secrets.ENV_PROD || secrets.ENV_DEV }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          envs: ENV_NAME,IMAGE,HOST_PORT,GHCR_USER,GHCR_TOKEN,ENV_SECRET
+          envs: ENV_NAME,IMAGE,HOST_PORT,GHCR_USER,GHCR_TOKEN,UPSTREAM_GITHUB_TOKEN,ENV_SECRET
           script: |
             set -euo pipefail
 
@@ -220,7 +222,18 @@ jobs:
             # 3. Tulis env file dari GitHub Secret (wajib — tidak ada fallback)
             echo "📝 Writing .env.${ENV_NAME} from GitHub Secrets..."
             mkdir -p "${APP_DIR}"
+            umask 077
             printf '%s\n' "${ENV_SECRET}" > "${ENV_FILE}"
+            # Optional dedicated secret overrides GITHUB_TOKEN from ENV_DEV/ENV_PROD.
+            # An unset dedicated secret preserves the env-file value (or anonymous access).
+            if [ -n "${UPSTREAM_GITHUB_TOKEN:-}" ]; then
+              if [[ "$UPSTREAM_GITHUB_TOKEN" == *$'\n'* || "$UPSTREAM_GITHUB_TOKEN" == *$'\r'* ]]; then
+                echo "Invalid UPSTREAM_GITHUB_TOKEN: must be a single line" >&2
+                exit 1
+              fi
+              sed -i '/^[[:space:]]*GITHUB_TOKEN[[:space:]]*=/d' "${ENV_FILE}"
+              printf 'GITHUB_TOKEN=%s\n' "$UPSTREAM_GITHUB_TOKEN" >> "${ENV_FILE}"
+            fi
             chmod 600 "${ENV_FILE}"
             echo "✅ Env file written: ${ENV_FILE} ($(wc -l < "${ENV_FILE}") lines)"
 

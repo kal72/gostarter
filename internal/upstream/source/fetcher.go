@@ -43,9 +43,10 @@ type Fetcher struct {
 	owner      string
 	repo       string
 	branch     string
+	token      string
 }
 
-func NewFetcher(owner, repo, branch string) *Fetcher {
+func NewFetcher(owner, repo, branch string, githubToken ...string) *Fetcher {
 	if owner == "" {
 		owner = DefaultRepoOwner
 	}
@@ -55,6 +56,10 @@ func NewFetcher(owner, repo, branch string) *Fetcher {
 	if branch == "" {
 		branch = DefaultBranch
 	}
+	token := ""
+	if len(githubToken) > 0 {
+		token = strings.TrimSpace(githubToken[0])
+	}
 	return &Fetcher{
 		httpClient: &http.Client{
 			Timeout: 45 * time.Second,
@@ -62,6 +67,7 @@ func NewFetcher(owner, repo, branch string) *Fetcher {
 		owner:  owner,
 		repo:   repo,
 		branch: branch,
+		token:  token,
 	}
 }
 
@@ -74,6 +80,9 @@ func (f *Fetcher) FetchCommitInfo(ctx context.Context) (*CommitInfo, error) {
 	}
 	req.Header.Set("User-Agent", "GoStarter-Generator/1.0")
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	if f.token != "" {
+		req.Header.Set("Authorization", "Bearer "+f.token)
+	}
 
 	resp, err := f.httpClient.Do(req)
 	if err != nil {
@@ -83,7 +92,7 @@ func (f *Fetcher) FetchCommitInfo(ctx context.Context) (*CommitInfo, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 8192))
-		return nil, fmt.Errorf("github api returned status %d: %s", resp.StatusCode, string(body))
+		return nil, githubResponseError(resp, body, time.Now(), f.token)
 	}
 
 	var ghResp GitHubCommitResponse

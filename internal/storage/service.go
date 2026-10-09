@@ -20,12 +20,13 @@ import (
 )
 
 type Service struct {
-	repository *database.DB
-	archives   *snapshot.Store
-	policy     config.StorageConfig
+	repository  *database.DB
+	archives    *snapshot.Store
+	policy      config.StorageConfig
+	githubToken string
 }
 
-func New(repository *database.DB, policy config.StorageConfig) (*Service, error) {
+func New(repository *database.DB, policy config.StorageConfig, githubToken ...string) (*Service, error) {
 	if repository == nil || policy.PlanLifetime <= 0 || policy.PlanLifetime > 30*24*time.Hour || policy.RetainSnapshots < 1 || policy.RetainSnapshots > 1000 || policy.MaxPendingJobs < 1 || policy.MaxPendingJobs > 10000 || policy.DiagnosticBytes < 256 || policy.DiagnosticBytes > 8192 {
 		return nil, fmt.Errorf("invalid storage policy")
 	}
@@ -33,7 +34,11 @@ func New(repository *database.DB, policy config.StorageConfig) (*Service, error)
 	if err != nil {
 		return nil, err
 	}
-	return &Service{repository, archives, policy}, nil
+	token := ""
+	if len(githubToken) > 0 {
+		token = strings.TrimSpace(githubToken[0])
+	}
+	return &Service{repository: repository, archives: archives, policy: policy, githubToken: token}, nil
 }
 
 // Capture downloads one resolved commit and persists a downloaded candidate. It cannot activate it.
@@ -62,7 +67,7 @@ func (s *Service) CaptureLease(ctx context.Context, lease database.SyncLease) (s
 	if len(parts) != 2 {
 		return snapshot.Metadata{}, fmt.Errorf("invalid source repository")
 	}
-	info, data, err := source.NewFetcher(parts[0], parts[1], lease.State.Ref).Fetch(ctx)
+	info, data, err := source.NewFetcher(parts[0], parts[1], lease.State.Ref, s.githubToken).Fetch(ctx)
 	if err != nil {
 		return snapshot.Metadata{}, err
 	}
@@ -122,6 +127,9 @@ func (s *Service) Retain(ctx context.Context) (int, error) {
 
 // Summary truncates on a UTF-8 boundary; full command logs never enter the repository.
 func (s *Service) Summary(message string) string {
+	if s.githubToken != "" {
+		message = strings.ReplaceAll(message, s.githubToken, "[redacted]")
+	}
 	message = strings.ToValidUTF8(message, "\uFFFD")
 	if len(message) <= s.policy.DiagnosticBytes {
 		return message
