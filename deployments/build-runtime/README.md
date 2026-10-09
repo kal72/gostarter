@@ -1,0 +1,1 @@
+Pinned dependency manifests for the offline generation runtime. These are build inputs, not test fixtures. Update deliberately when adopting an upstream dependency change; rebuild the image afterwards. Runtime upstream sync remains manual through Admin.

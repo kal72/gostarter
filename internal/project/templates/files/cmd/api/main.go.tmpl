@@ -1,0 +1,36 @@
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"<<%.Module%>>/bootstrap"
+)
+
+func main() {
+	ctx := context.Background()
+
+	app, cleanup, err := bootstrap.InitializeApp(ctx)
+	if err != nil {
+		log.Fatalf("failed to initialize app: %v", err)
+	}
+	defer cleanup()
+
+	// Start the selected transport servers.
+	go app.StartGRPC()
+	<<%if eq .Protocol "dual"%>>go app.StartHTTPGateway()<<%end%>>
+
+	// Block until OS interrupt or termination signal.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	// Drain using the configured shutdown budget.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), app.ShutdownTimeout())
+	defer cancel()
+
+	app.Shutdown(shutdownCtx)
+}

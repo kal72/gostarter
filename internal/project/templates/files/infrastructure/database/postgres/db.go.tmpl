@@ -1,0 +1,58 @@
+package postgres
+
+import (
+	"fmt"
+
+	"<<%.Module%>>/infrastructure/config"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/plugin/opentelemetry/tracing"
+)
+
+// New opens a PostgreSQL connection pool via GORM using the application config.
+func New(cfg *config.Config) (*gorm.DB, error) {
+	dbCfg := cfg.Database
+
+	gormCfg := &gorm.Config{DisableAutomaticPing: true}
+	if cfg.App.Environment != "production" {
+		gormCfg.Logger = logger.Default.LogMode(logger.Info)
+	} else {
+		gormCfg.Logger = logger.Default.LogMode(logger.Silent)
+	}
+
+	db, err := gorm.Open(postgres.Open(dbCfg.DSN()), gormCfg)
+	if err != nil {
+		return nil, fmt.Errorf("postgres: open: %w", err)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("postgres: get sql.DB: %w", err)
+	}
+
+	success := false
+	defer func() {
+		if !success {
+			_ = sqlDB.Close()
+		}
+	}()
+
+	sqlDB.SetMaxOpenConns(dbCfg.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(dbCfg.MaxIdleConns)
+	sqlDB.SetConnMaxLifetime(dbCfg.ConnMaxLifetime)
+
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("postgres: ping: %w", err)
+	}
+
+	if cfg.Telemetry.Enabled {
+		if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+			return nil, fmt.Errorf("postgres: otel plugin: %w", err)
+		}
+	}
+
+	success = true
+	return db, nil
+}

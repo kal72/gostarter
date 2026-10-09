@@ -1,0 +1,19 @@
+# <<%.ServiceName%>>
+
+<<%.Description%>>
+
+Generated with GoStarter templates v4, following go-feature-based-clean revision 1.
+Includes selected extensions from the resolved manifest and core health, PostgreSQL, JWT middleware, structured logging, and optional OpenTelemetry.
+
+Requirements: Go <<%.GoVersion%>>, PostgreSQL. Copy `.env.example` to `.env`, configure DB credentials and a JWT secret, then run `go run ./cmd/api`.
+
+<<%if eq .Protocol "dual"%>>HTTP: `GET /healthz`, `GET /readyz`;<<%end%>> gRPC: `health.v1.HealthService`.
+<<%if eq .Protocol "dual"%>>Swagger UI: `/swagger/`.<<%else%>>Transport: gRPC-only; upstream gateway adapters remain as library methods without an HTTP listener.<<%end%>> Readiness checks the shared PostgreSQL pool.
+
+When migrations are present, apply the `.up.sql` files in numeric order using your migration runner before starting the selected features.
+
+Run `make test` or `make build`. Generated protobuf and Wire files are already included.
+Regeneration requires the pinned tools described by `scripts/protogen.sh` and Wire v0.7.0.
+
+Validation target: Go <<%.GoVersion%>>, linux/amd64 with CGO disabled.
+Docker build: `docker build --platform linux/amd64 -f deployments/Dockerfile .`.

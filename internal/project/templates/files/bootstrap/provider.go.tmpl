@@ -1,0 +1,95 @@
+package bootstrap
+
+import (
+	"context"
+	"sync"
+
+	"<<%.Module%>>/infrastructure/config"
+	"<<%.Module%>>/infrastructure/database/postgres"
+	"<<%.Module%>>/infrastructure/telemetry"
+	pkgLogger "<<%.Module%>>/pkg/logger"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"gorm.io/gorm"
+)
+
+// Resources owns the single shared pool, telemetry providers, and logger.
+// Wire distributes the same handles to all consumers.
+type Resources struct {
+	Logger pkgLogger.Logger
+	DB     *gorm.DB
+	Tracer *sdktrace.TracerProvider
+	Meter  *sdkmetric.MeterProvider
+	once   sync.Once
+}
+
+// NewResources returns cleanup for both partial initialization and deferred exit.
+func NewResources(ctx context.Context, cfg *config.Config) (*Resources, func(), error) {
+	r := &Resources{}
+	cleanup := func() {
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+		defer cancel()
+		r.Close(ctx)
+	}
+	var err error
+	r.Logger, err = ProvideLogger(cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	r.DB, err = postgres.New(cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	r.Tracer, err = telemetry.NewTracerFromConfig(ctx, cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	r.Meter, err = telemetry.NewMeterFromConfig(cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	return r, cleanup, nil
+}
+
+// Close is idempotent and called after ingress and background work have drained.
+func (r *Resources) Close(ctx context.Context) {
+	r.once.Do(func() {
+		if r.DB != nil {
+			if pool, err := r.DB.DB(); err == nil {
+				_ = pool.Close()
+			}
+		}
+		if r.Tracer != nil {
+			if err := r.Tracer.Shutdown(ctx); err != nil && r.Logger != nil {
+				r.Logger.Error(ctx, "tracer shutdown", err)
+			}
+		}
+		if r.Meter != nil {
+			if err := r.Meter.Shutdown(ctx); err != nil && r.Logger != nil {
+				r.Logger.Error(ctx, "meter shutdown", err)
+			}
+		}
+		if r.Logger != nil {
+			_ = r.Logger.Sync()
+		}
+	})
+}
+
+// ProvideLogger constructs the unified application microservice Logger from the application config.
+func ProvideLogger(cfg *config.Config) (pkgLogger.Logger, error) {
+	log, err := pkgLogger.New(pkgLogger.Config{
+		Level:       cfg.Logger.Level,
+		Environment: cfg.App.Environment,
+		ServiceName: cfg.App.Name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pkgLogger.SetDefault(log)
+	return log, nil
+}

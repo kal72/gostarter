@@ -1,0 +1,14 @@
+package postgres
+
+import (
+	"<<%.Module%>>/pkg/transaction"
+
+	"github.com/google/wire"
+)
+
+// ProviderSet wires the PostgreSQL connection pool and transaction manager.
+var ProviderSet = wire.NewSet(
+	New,
+	NewTransactionManager,
+	wire.Bind(new(transaction.Manager), new(*TransactionManager)),
+)

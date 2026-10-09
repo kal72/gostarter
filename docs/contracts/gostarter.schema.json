@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoStarter optional extension manifest v1",
+  "description": "Upstream catalog for non-default features and pkg extensions. Architecture and infrastructure defaults belong to GoStarter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/extension"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "extension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "title",
+        "description",
+        "path"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "feature",
+            "pkg"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^\\s](?:[^\\r\\n]*[^\\s])?$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^[^\\s](?:[^\\r\\n]*[^\\s])?$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "path": {
+          "type": "string"
+        },
+        "requires": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "feature"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "path": {
+                "pattern": "^internal/[a-z][a-z0-9_]*$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "path": {
+                "pattern": "^pkg/[a-z][a-z0-9_]*$"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

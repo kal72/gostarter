@@ -1,0 +1,145 @@
+package config
+
+import (
+	"fmt"
+	"reflect"
+	"time"
+
+	"github.com/spf13/viper"
+)
+
+// Config is the root configuration structure for the application.
+// All values are loaded from environment variables or configuration files.
+type Config struct {
+	App      AppConfig      `mapstructure:",squash"`
+	Server   ServerConfig   `mapstructure:",squash"`
+	Database DatabaseConfig `mapstructure:",squash"`
+
+	JWT       JWTConfig       `mapstructure:",squash"`
+	Logger    LoggerConfig    `mapstructure:",squash"`
+	Telemetry TelemetryConfig `mapstructure:",squash"`
+}
+
+// AppConfig holds general application metadata.
+type AppConfig struct {
+	Name        string `mapstructure:"APP_NAME"`
+	Environment string `mapstructure:"APP_ENV"` // development | staging | production
+	Version     string `mapstructure:"APP_VERSION"`
+}
+
+// ServerConfig holds gRPC and HTTP gateway listen addresses.
+type ServerConfig struct {
+	GRPCPort        int           `mapstructure:"SERVER_GRPC_PORT"`
+	<<%if eq .Protocol "dual"%>>HTTPPort        int           `mapstructure:"SERVER_HTTP_PORT"`
+	ReadTimeout     time.Duration `mapstructure:"SERVER_READ_TIMEOUT"`
+	WriteTimeout    time.Duration `mapstructure:"SERVER_WRITE_TIMEOUT"`<<%end%>>
+	ShutdownTimeout time.Duration `mapstructure:"SERVER_SHUTDOWN_TIMEOUT"`
+	DefaultTimeout  time.Duration `mapstructure:"SERVER_DEFAULT_TIMEOUT"`
+}
+
+// DatabaseConfig holds PostgreSQL connection parameters.
+type DatabaseConfig struct {
+	Host            string        `mapstructure:"DB_HOST"`
+	Port            int           `mapstructure:"DB_PORT"`
+	Name            string        `mapstructure:"DB_NAME"`
+	User            string        `mapstructure:"DB_USER"`
+	Password        string        `mapstructure:"DB_PASSWORD"`
+	SSLMode         string        `mapstructure:"DB_SSL_MODE"`
+	MaxOpenConns    int           `mapstructure:"DB_MAX_OPEN_CONNS"`
+	MaxIdleConns    int           `mapstructure:"DB_MAX_IDLE_CONNS"`
+	ConnMaxLifetime time.Duration `mapstructure:"DB_CONN_MAX_LIFETIME"`
+}
+
+// DSN returns a PostgreSQL connection string.
+func (d DatabaseConfig) DSN() string {
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		d.Host, d.Port, d.User, d.Password, d.Name, d.SSLMode,
+	)
+}
+
+// JWTConfig holds JWT signing configuration.
+type JWTConfig struct {
+	SecretKey       string        `mapstructure:"JWT_SECRET_KEY"`
+	<<%if .HasAuth%>>AccessTokenTTL  time.Duration `mapstructure:"JWT_ACCESS_TOKEN_TTL"`
+	RefreshTokenTTL time.Duration `mapstructure:"JWT_REFRESH_TOKEN_TTL"`<<%end%>>
+}
+
+// LoggerConfig holds logger settings.
+type LoggerConfig struct {
+	Level string `mapstructure:"LOG_LEVEL"` // debug | info | warn | error
+}
+
+// TelemetryConfig holds OpenTelemetry settings.
+type TelemetryConfig struct {
+	ServiceName  string `mapstructure:"OTEL_SERVICE_NAME"`
+	OTLPEndpoint string `mapstructure:"OTEL_ENDPOINT"`
+	Enabled      bool   `mapstructure:"OTEL_ENABLED"`
+}
+
+// Load reads configuration using Viper from environment variables and optional .env file.
+func Load() (*Config, error) {
+	v := viper.New()
+
+	// Register every known key so env-only values participate in Viper Unmarshal.
+	if err := bindEnvironment(v, reflect.TypeOf(Config{})); err != nil {
+		return nil, err
+	}
+	for key, value := range map[string]any{
+		"APP_NAME": <<%quote .ServiceName%>>,
+		"APP_ENV":  "development", "APP_VERSION": <<%quote .ProjectVersion%>>,
+		"SERVER_GRPC_PORT": <<%.GRPCPort%>>, <<%if eq .Protocol "dual"%>>"SERVER_HTTP_PORT": <<%.HTTPPort%>>,
+		"SERVER_READ_TIMEOUT": "30s", "SERVER_WRITE_TIMEOUT": "30s",<<%end%>>
+		"SERVER_SHUTDOWN_TIMEOUT": "30s",
+		"DB_HOST":                 "localhost", "DB_PORT": 5432, "DB_NAME": "appdb",
+		"DB_USER": "appuser", "DB_SSL_MODE": "disable",
+		"DB_MAX_OPEN_CONNS": 25, "DB_MAX_IDLE_CONNS": 5, "DB_CONN_MAX_LIFETIME": "5m",
+		<<%if .HasAuth%>>"JWT_ACCESS_TOKEN_TTL": "15m", "JWT_REFRESH_TOKEN_TTL": "720h",<<%end%>>
+		"LOG_LEVEL": "debug", "OTEL_SERVICE_NAME": <<%quote .ServiceName%>>,
+	} {
+		v.SetDefault(key, value)
+	}
+
+	// Read from .env file if present in current directory or parent directories
+	v.SetConfigName(".env")
+	v.SetConfigType("env")
+	v.AddConfigPath(".")
+	v.AddConfigPath("../")
+	v.AddConfigPath("../../")
+	_ = v.ReadInConfig()
+
+	// Enable environment variables overriding
+	v.AutomaticEnv()
+
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("config: unmarshal: %w", err)
+	}
+
+	// Set safe defaults for timeout settings if not explicitly configured
+	if cfg.Server.DefaultTimeout <= 0 {
+		cfg.Server.DefaultTimeout = 15 * time.Second
+	}
+
+	if cfg.Server.ShutdownTimeout <= 0 {
+		cfg.Server.ShutdownTimeout = 30 * time.Second
+	}
+	return &cfg, nil
+}
+
+func bindEnvironment(v *viper.Viper, typ reflect.Type) error {
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		key := field.Tag.Get("mapstructure")
+		if key == ",squash" {
+			if err := bindEnvironment(v, field.Type); err != nil {
+				return err
+			}
+		} else if key != "" {
+			if err := v.BindEnv(key); err != nil {
+				return fmt.Errorf("config: bind env %s: %w", key, err)
+			}
+		}
+	}
+	return nil
+}

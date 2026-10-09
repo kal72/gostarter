@@ -1,0 +1,49 @@
+//go:build wireinject
+
+package bootstrap
+
+import (
+	"context"
+
+	infraConfig "<<%.Module%>>/infrastructure/config"
+	"<<%.Module%>>/internal/health"
+	<<%if .NeedsTransaction%>>"<<%.Module%>>/infrastructure/database/postgres"
+ "<<%.Module%>>/pkg/transaction"<<%end%>>
+	<<%range .Features%>><<%.Alias%>> "<<%$.Module%>>/<<%.SourcePath%>>"
+	<<%end%>>
+
+	"github.com/google/wire"
+)
+
+// serverSet wires bootstrap servers and application lifecycle container.
+var serverSet = wire.NewSet(
+	ProvideServices,
+	NewGRPCServer,
+	<<%if eq .Protocol "dual"%>>NewHTTPGateway,<<%end%>>
+	NewApp,
+)
+
+// InitializeApp is the Wire injection entry point.
+// wire.Build declares the full dependency graph; wire generates wire_gen.go.
+func InitializeApp(ctx context.Context) (*App, func(), error) {
+	wire.Build(
+		// Config (from environment variables)
+		infraConfig.ProviderSet,
+
+		// Shared infrastructure and logger
+		NewResources,
+		wire.FieldsOf(new(*Resources), "Logger", "DB", "Tracer", "Meter"),
+
+		// Core services
+
+		health.ProviderSet,
+	<<%if .NeedsTransaction%>>postgres.NewTransactionManager,
+ wire.Bind(new(transaction.Manager), new(*postgres.TransactionManager)),<<%end%>>
+	<<%range .Features%>><<%.Alias%>>.ProviderSet,
+	<<%end%>>
+
+		// Bootstrap
+		serverSet,
+	)
+	return nil, nil, nil
+}

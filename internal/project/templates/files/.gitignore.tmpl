@@ -1,0 +1,42 @@
+# ─── Binaries ─────────────────────────────────────────────────────────────────
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ─── Test artefacts ────────────────────────────────────────────────────────────
+*.test
+*.out
+coverage.out
+coverage.html
+
+# ─── Go workspace / module cache ──────────────────────────────────────────────
+vendor/
+
+# ─── Generated mocks (regenerate with `make mocks`) ───────────────────────────
+**/mock_*.go
+**/mocks/
+
+# ─── Editor & OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Environment files (never commit secrets) ─────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Docker ────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─── Temporary files ──────────────────────────────────────────────────────────
+tmp/
+*.tmp
+*.log

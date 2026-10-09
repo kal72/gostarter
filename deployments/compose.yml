@@ -1,0 +1,26 @@
+name: gostarter-review
+services:
+  server:
+    image: gostarter:review
+    build:
+      context: ..
+    restart: unless-stopped
+    ports:
+      - "${GOSTARTER_HOST_PORT:-8089}:8089"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8089/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set an isolated staging database URL}
+      ADMIN_DEFAULT_USER: ${ADMIN_DEFAULT_USER:-admin}
+      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:?Set initial admin password}
+      APP_PORT: '8089'
+      SNAPSHOT_DIR: /app/snapshots
+      VALIDATION_WORKSPACE_DIR: /tmp/gostarter-validation
+    volumes:
+      - snapshots:/app/snapshots
+
+volumes:
+  snapshots:

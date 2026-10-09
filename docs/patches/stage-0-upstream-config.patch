@@ -1,0 +1,132 @@
+--- a/infrastructure/config/config.go
++++ b/infrastructure/config/config.go
+@@ -2,6 +2,7 @@
+ 
+ import (
+ 	"fmt"
++	"reflect"
+ 	"time"
+ 
+ 	"github.com/spf13/viper"
+@@ -101,6 +102,25 @@
+ func Load() (*Config, error) {
+ 	v := viper.New()
+ 
++	// Register every known key so env-only values participate in Viper Unmarshal.
++	if err := bindEnvironment(v, reflect.TypeOf(Config{})); err != nil {
++		return nil, err
++	}
++	for key, value := range map[string]any{
++		"APP_NAME": "go-feature-based-boilerplate",
++		"APP_ENV":  "development", "APP_VERSION": "0.1.0",
++		"SERVER_GRPC_PORT": 50051, "SERVER_HTTP_PORT": 8080,
++		"SERVER_READ_TIMEOUT": "30s", "SERVER_WRITE_TIMEOUT": "30s",
++		"SERVER_SHUTDOWN_TIMEOUT": "30s",
++		"DB_HOST":                 "localhost", "DB_PORT": 5432, "DB_NAME": "appdb",
++		"DB_USER": "appuser", "DB_SSL_MODE": "disable",
++		"DB_MAX_OPEN_CONNS": 25, "DB_MAX_IDLE_CONNS": 5, "DB_CONN_MAX_LIFETIME": "5m",
++		"JWT_ACCESS_TOKEN_TTL": "15m", "JWT_REFRESH_TOKEN_TTL": "720h",
++		"LOG_LEVEL": "debug",
++	} {
++		v.SetDefault(key, value)
++	}
++
+ 	// Read from .env file if present in current directory or parent directories
+ 	v.SetConfigName(".env")
+ 	v.SetConfigType("env")
+@@ -130,3 +150,20 @@
+ 
+ 	return &cfg, nil
+ }
++
++func bindEnvironment(v *viper.Viper, typ reflect.Type) error {
++	for i := 0; i < typ.NumField(); i++ {
++		field := typ.Field(i)
++		key := field.Tag.Get("mapstructure")
++		if key == ",squash" {
++			if err := bindEnvironment(v, field.Type); err != nil {
++				return err
++			}
++		} else if key != "" {
++			if err := v.BindEnv(key); err != nil {
++				return fmt.Errorf("config: bind env %s: %w", key, err)
++			}
++		}
++	}
++	return nil
++}
+--- a/infrastructure/config/config_test.go
++++ b/infrastructure/config/config_test.go
+@@ -2,6 +2,7 @@
+ 
+ import (
+ 	"os"
++	"strings"
+ 	"testing"
+ 	"time"
+ 
+@@ -12,9 +13,7 @@
+ )
+ 
+ func TestLoad_Defaults(t *testing.T) {
+-	// Clear any env vars that might interfere
+-	os.Unsetenv("APP_NAME")
+-	os.Unsetenv("DB_HOST")
++	isolateConfig(t)
+ 
+ 	cfg, err := config.Load()
+ 	require.NoError(t, err)
+@@ -25,25 +24,29 @@
+ }
+ 
+ func TestLoad_DotEnv(t *testing.T) {
++	isolateConfig(t)
++	require.NoError(t, os.WriteFile(".env", []byte("DB_USER=postgres\nDB_PASSWORD=postgres\nSERVER_GRPC_PORT=5050\n"), 0600))
+ 	cfg, err := config.Load()
+ 	require.NoError(t, err)
+-	// .env has DB_USER=postgres
++	// The test owns this .env fixture; no developer configuration is required.
+ 	assert.Equal(t, "postgres", cfg.Database.User)
+ 	assert.Equal(t, "postgres", cfg.Database.Password)
++	assert.Equal(t, 5050, cfg.Server.GRPCPort)
+ }
+ 
+ func TestLoad_EnvOverride(t *testing.T) {
+-	os.Setenv("APP_NAME", "custom-app")
+-	os.Setenv("SERVER_GRPC_PORT", "9090")
+-	defer func() {
+-		os.Unsetenv("APP_NAME")
+-		os.Unsetenv("SERVER_GRPC_PORT")
+-	}()
++	isolateConfig(t)
++	t.Setenv("APP_NAME", "custom-app")
++	t.Setenv("SERVER_GRPC_PORT", "9090")
++	t.Setenv("REDIS_ADDR", "cache.example:6380")
++	t.Setenv("JWT_SECRET_KEY", "test-only-secret")
+ 
+ 	cfg, err := config.Load()
+ 	require.NoError(t, err)
+ 	assert.Equal(t, "custom-app", cfg.App.Name)
+ 	assert.Equal(t, 9090, cfg.Server.GRPCPort)
++	assert.Equal(t, "cache.example:6380", cfg.Redis.Addr)
++	assert.Equal(t, "test-only-secret", cfg.JWT.SecretKey)
+ }
+ 
+ func TestDatabaseConfig_DSN(t *testing.T) {
+@@ -59,3 +62,16 @@
+ 	expectedDSN := "host=localhost port=5432 user=testuser password=testpassword dbname=testdb sslmode=disable"
+ 	assert.Equal(t, expectedDSN, dbCfg.DSN())
+ }
++
++func isolateConfig(t *testing.T) {
++	t.Helper()
++	t.Chdir(t.TempDir())
++	for _, entry := range os.Environ() {
++		key, _, _ := strings.Cut(entry, "=")
++		for _, prefix := range []string{"APP_", "SERVER_", "DB_", "MONGO_", "REDIS_", "JWT_", "LOG_", "OTEL_", "COMPANY_SERVICE_"} {
++			if strings.HasPrefix(key, prefix) {
++				t.Setenv(key, "")
++			}
++		}
++	}
++}

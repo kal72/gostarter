@@ -1,0 +1,97 @@
+package middleware
+
+import (
+	"context"
+	"errors"
+	"strings"
+
+	"<<%.Module%>>/infrastructure/config"
+	"<<%.Module%>>/pkg/contextutil"
+	"<<%.Module%>>/pkg/jwtutil"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+)
+
+type contextKey string
+
+const (
+	// ContextKeyUserID is the context key used to store the authenticated user ID.
+	ContextKeyUserID contextKey = "user_id"
+)
+
+// publicMethods lists gRPC methods that do not require authentication.
+var publicMethods = map[string]bool{
+	<<%range .PublicMethods%>><<%quote .%>>: true,
+	<<%end%>>
+	"/health.v1.HealthService/Check": true,
+	"/health.v1.HealthService/Ready": true,
+}
+
+// AuthInterceptor is a gRPC unary server interceptor that validates JWT bearer
+// tokens for protected endpoints. The user ID and role are stored in the context on
+// successful validation.
+func AuthInterceptor(cfg *config.Config) grpc.UnaryServerInterceptor {
+	secretKey := []byte(cfg.JWT.SecretKey)
+
+	return func(
+		ctx context.Context,
+		req any,
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (any, error) {
+		if publicMethods[info.FullMethod] {
+			return handler(ctx, req)
+		}
+
+		token, err := extractBearerToken(ctx)
+		if err != nil {
+			return nil, status.Error(codes.Unauthenticated, err.Error())
+		}
+
+		claims, err := jwtutil.ValidateToken(token, secretKey)
+		if err != nil {
+			if errors.Is(err, jwtutil.ErrInvalidSubject) {
+				return nil, status.Error(codes.Unauthenticated, "invalid token subject")
+			}
+			return nil, status.Error(codes.Unauthenticated, "invalid or expired token")
+		}
+
+		ctx = contextutil.WithUserID(ctx, claims.UserID)
+		if claims.Role != "" {
+			ctx = contextutil.WithRole(ctx, claims.Role)
+		}
+		return handler(ctx, req)
+	}
+}
+
+// UserIDFromContext extracts the authenticated user ID from the context.
+func UserIDFromContext(ctx context.Context) (uint, bool) {
+	return contextutil.GetUserID(ctx)
+}
+
+// RoleFromContext extracts the authenticated user role from the context.
+func RoleFromContext(ctx context.Context) (string, bool) {
+	return contextutil.GetRole(ctx)
+}
+
+func extractBearerToken(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", status.Error(codes.Unauthenticated, "missing metadata")
+	}
+
+	values := md.Get("authorization")
+	if len(values) == 0 {
+		return "", status.Error(codes.Unauthenticated, "missing authorization header")
+	}
+
+	parts := strings.SplitN(values[0], " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "bearer") {
+		return "", status.Error(codes.Unauthenticated, "invalid authorization header format")
+	}
+
+	return parts[1], nil
+}

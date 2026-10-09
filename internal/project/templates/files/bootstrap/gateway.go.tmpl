@@ -1,0 +1,275 @@
+package bootstrap
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/pprof"
+	"strings"
+	"time"
+
+	"<<%.Module%>>/gen/openapi"
+	"<<%.Module%>>/infrastructure/config"
+	"<<%.Module%>>/infrastructure/swagger"
+
+	"github.com/google/uuid"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
+)
+
+// Meta holds correlation and timestamp metadata for API responses.
+type Meta struct {
+	RequestID string `json:"request_id,omitempty"`
+	Timestamp string `json:"timestamp"`
+}
+
+// SuccessEnvelope is the unified response envelope for HTTP 2xx responses.
+type SuccessEnvelope struct {
+	Status  string          `json:"status"`
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+	Meta    Meta            `json:"meta"`
+}
+
+// ErrorEnvelope is the unified response envelope for HTTP 4xx/5xx responses.
+type ErrorEnvelope struct {
+	Status  string `json:"status"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Errors  any    `json:"errors"`
+	Meta    Meta   `json:"meta"`
+}
+
+// GatewayErrorHandler formats all gRPC errors into the standard ErrorEnvelope for REST clients.
+func GatewayErrorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
+	st, ok := status.FromError(err)
+	if !ok {
+		st = status.New(codes.Unknown, err.Error())
+	}
+
+	httpStatus := runtime.HTTPStatusFromCode(st.Code())
+
+	reqID := r.Header.Get("X-Request-ID")
+	if reqID == "" {
+		reqID = r.Header.Get("Grpc-Metadata-X-Request-ID")
+	}
+
+	var errorDetails any
+	details := st.Details()
+	if len(details) > 0 {
+		errorDetails = details
+	}
+
+	envelope := ErrorEnvelope{
+		Status:  "failed",
+		Code:    httpStatus,
+		Message: st.Message(),
+		Errors:  errorDetails,
+		Meta: Meta{
+			RequestID: reqID,
+			Timestamp: time.Now().UTC().Format(time.RFC3339),
+		},
+	}
+
+	buf, marshalErr := json.Marshal(envelope)
+	if marshalErr != nil {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(httpStatus)
+		_, _ = w.Write([]byte(fmt.Sprintf(`{"status":"failed","code":%d,"message":%q,"errors":null,"meta":{"request_id":%q,"timestamp":%q}}`,
+			httpStatus, st.Message(), reqID, time.Now().UTC().Format(time.RFC3339))))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(httpStatus)
+	_, _ = w.Write(buf)
+}
+
+// responseRecorder buffers the HTTP response to wrap success payloads in a base envelope.
+type responseRecorder struct {
+	http.ResponseWriter
+	statusCode int
+	body       *bytes.Buffer
+	headers    http.Header
+}
+
+func newResponseRecorder(w http.ResponseWriter) *responseRecorder {
+	return &responseRecorder{
+		ResponseWriter: w,
+		statusCode:     http.StatusOK,
+		body:           &bytes.Buffer{},
+		headers:        make(http.Header),
+	}
+}
+
+func (r *responseRecorder) Header() http.Header {
+	return r.headers
+}
+
+func (r *responseRecorder) WriteHeader(code int) {
+	r.statusCode = code
+}
+
+func (r *responseRecorder) Write(b []byte) (int, error) {
+	return r.body.Write(b)
+}
+
+// responseEnvelopeMiddleware intercepts successful JSON responses from grpc-gateway
+// and wraps them in a standard SuccessEnvelope.
+func responseEnvelopeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqID := r.Header.Get("X-Request-ID")
+		if reqID == "" {
+			reqID = uuid.NewString()
+			r.Header.Set("X-Request-ID", reqID)
+		}
+		w.Header().Set("X-Request-ID", reqID)
+
+		rec := newResponseRecorder(w)
+		next.ServeHTTP(rec, r)
+
+		// Forward headers (skipping Content-Length as envelope changes payload size)
+		for k, vv := range rec.headers {
+			if strings.EqualFold(k, "Content-Length") {
+				continue
+			}
+			for _, v := range vv {
+				w.Header().Add(k, v)
+			}
+		}
+
+		// If error handler already formatted the response (4xx / 5xx)
+		if rec.statusCode >= 400 {
+			w.WriteHeader(rec.statusCode)
+			_, _ = w.Write(rec.body.Bytes())
+			return
+		}
+
+		// Success response (2xx)
+		var rawData json.RawMessage
+		trimmed := bytes.TrimSpace(rec.body.Bytes())
+		if len(trimmed) > 0 && json.Valid(trimmed) {
+			rawData = json.RawMessage(trimmed)
+		} else if len(trimmed) > 0 {
+			if encoded, err := json.Marshal(string(trimmed)); err == nil {
+				rawData = json.RawMessage(encoded)
+			}
+		} else {
+			rawData = json.RawMessage("{}")
+		}
+
+		envelope := SuccessEnvelope{
+			Status:  "success",
+			Code:    rec.statusCode,
+			Message: "success",
+			Data:    rawData,
+			Meta: Meta{
+				RequestID: reqID,
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+			},
+		}
+
+		respBytes, err := json.Marshal(envelope)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"status":"failed","code":500,"message":"internal error marshaling envelope","errors":null,"meta":{"request_id":%q,"timestamp":%q}}`,
+				reqID, time.Now().UTC().Format(time.RFC3339))))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(rec.statusCode)
+		_, _ = w.Write(respBytes)
+	})
+}
+
+// NewHTTPGateway builds the HTTP/REST gateway server.
+//
+// It registers all gRPC services via grpc-gateway so that REST clients can
+// reach them without a separate HTTP handler. Swagger UI is served at /swagger/.
+func NewHTTPGateway(ctx context.Context, cfg *config.Config, services *Services) (*http.Server, func(), error) {
+	ctx, cancel := context.WithCancel(ctx)
+	grpcAddr := fmt.Sprintf("localhost:%d", cfg.Server.GRPCPort)
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+
+	gwMux := runtime.NewServeMux(
+		runtime.WithErrorHandler(GatewayErrorHandler),
+		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
+			switch strings.ToLower(key) {
+			case "x-request-id":
+				return "x-request-id", true
+			case "idempotency-key", "x-idempotency-key":
+				return "idempotency-key", true
+			default:
+				return runtime.DefaultHeaderMatcher(key)
+			}
+		}),
+	)
+
+	// ── Register gRPC-gateway handlers via unified Services collection ────────
+	if err := services.RegisterGateway(ctx, gwMux, grpcAddr, opts); err != nil {
+		cancel()
+		return nil, nil, fmt.Errorf("gateway: register services: %w", err)
+	}
+
+	mux := http.NewServeMux()
+
+	// ── Metrics at /metrics ───────────────────────────────────────────────────
+	mux.Handle("/metrics", promhttp.Handler())
+
+	// ── Continuous Profiling (pprof) in non-production ────────────────────────
+	if cfg.App.Environment != "production" {
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	}
+
+	// ── Swagger UI at /swagger/ ───────────────────────────────────────────────
+	mux.Handle("/swagger/", swagger.Handler(openapi.Spec))
+
+	// ── All API + health routes via grpc-gateway with base response envelope ──
+	// Core exposes /healthz, /health, and /readyz.
+	mux.Handle("/", responseEnvelopeMiddleware(gwMux))
+
+	var handler http.Handler = withCORS(mux)
+	if cfg.Telemetry.Enabled {
+		handler = otelhttp.NewHandler(handler, "http-gateway")
+	}
+
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.Server.HTTPPort),
+		Handler:      handler,
+		ReadTimeout:  cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+	}
+
+	return srv, cancel, nil
+}
+
+// withCORS wraps an http.Handler with Cross-Origin Resource Sharing (CORS) headers.
+func withCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, QUERY, OPTIONS, HEAD")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token, X-Request-ID, Grpc-Metadata-X-Request-ID, Idempotency-Key, X-Idempotency-Key")
+		w.Header().Set("Access-Control-Expose-Headers", "Grpc-Metadata-*, Content-Length, Content-Type, Link, Idempotency-Key, X-Idempotency-Key")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

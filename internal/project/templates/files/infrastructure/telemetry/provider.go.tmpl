@@ -1,0 +1,43 @@
+package telemetry
+
+import (
+	"context"
+
+	"<<%.Module%>>/infrastructure/config"
+
+	"github.com/google/wire"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+// Config mirrors infrastructure/config.TelemetryConfig for internal use.
+type Config struct {
+	ServiceName  string
+	OTLPEndpoint string
+	Enabled      bool
+}
+
+// NewConfig extracts telemetry config from the application config.
+func NewConfig(cfg *config.Config) Config {
+	return Config{
+		ServiceName:  cfg.Telemetry.ServiceName,
+		OTLPEndpoint: cfg.Telemetry.OTLPEndpoint,
+		Enabled:      cfg.Telemetry.Enabled,
+	}
+}
+
+// NewTracerFromConfig is the Wire-compatible constructor for the tracer.
+func NewTracerFromConfig(ctx context.Context, cfg *config.Config) (*sdktrace.TracerProvider, error) {
+	return NewTracer(ctx, NewConfig(cfg))
+}
+
+// NewMeterFromConfig is the Wire-compatible constructor for the meter.
+func NewMeterFromConfig(cfg *config.Config) (*sdkmetric.MeterProvider, error) {
+	return NewMeter(NewConfig(cfg))
+}
+
+// ProviderSet wires telemetry components.
+var ProviderSet = wire.NewSet(
+	NewTracerFromConfig,
+	NewMeterFromConfig,
+)

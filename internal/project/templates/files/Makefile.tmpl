@@ -1,0 +1,10 @@
+.PHONY: build test run generate
+build:
+	go build -o bin/api ./cmd/api
+test:
+	go test -race ./...
+run:
+	go run ./cmd/api
+generate:
+	bash scripts/protogen.sh
+	wire ./bootstrap

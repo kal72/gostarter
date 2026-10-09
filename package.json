@@ -1,0 +1,15 @@
+{
+  "name": "gostarter-web",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-assets.cjs",
+    "test": "node --test tests/unit/*.test.cjs"
+  },
+  "dependencies": {
+    "alpinejs": "3.17.4",
+    "htmx.org": "2.0.11"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

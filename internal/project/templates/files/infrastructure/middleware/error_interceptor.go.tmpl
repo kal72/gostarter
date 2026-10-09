@@ -1,0 +1,77 @@
+package middleware
+
+import (
+	"context"
+	"errors"
+
+	"<<%.Module%>>/pkg/errorutil"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+// ErrorInterceptor is a gRPC unary server interceptor that converts AppError
+// values returned by handlers into the appropriate gRPC status codes.
+// All error-to-transport mapping happens here — handlers just return errors.
+func ErrorInterceptor() grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req any,
+		_ *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (any, error) {
+		resp, err := handler(ctx, req)
+		if err == nil {
+			return resp, nil
+		}
+
+		var appErr *errorutil.AppError
+		if errors.As(err, &appErr) {
+			grpcCode := toGRPCCode(appErr.Code)
+			msg := appErr.Message
+			if appErr.Code != errorutil.CodeInternal && appErr.Err != nil {
+				msg = appErr.Error()
+			}
+			return nil, status.Error(grpcCode, msg)
+		}
+
+		// Handle standard context deadline and cancellation errors
+		if errors.Is(err, context.DeadlineExceeded) || ctx.Err() == context.DeadlineExceeded {
+			return nil, status.Error(codes.DeadlineExceeded, "deadline exceeded")
+		}
+		if errors.Is(err, context.Canceled) || ctx.Err() == context.Canceled {
+			return nil, status.Error(codes.Canceled, "request canceled")
+		}
+
+		// If the error is already a gRPC status error, preserve it.
+		if _, ok := status.FromError(err); ok {
+			return nil, err
+		}
+
+		// Unknown / unexpected error — do not expose internal details.
+		return nil, status.Error(codes.Internal, "internal server error")
+	}
+}
+
+// toGRPCCode maps an application-level error code to a gRPC status code.
+func toGRPCCode(code errorutil.Code) codes.Code {
+	switch code {
+	case errorutil.CodeNotFound:
+		return codes.NotFound
+	case errorutil.CodeAlreadyExists:
+		return codes.AlreadyExists
+	case errorutil.CodeInvalidInput:
+		return codes.InvalidArgument
+	case errorutil.CodeUnauthorized:
+		return codes.Unauthenticated
+	case errorutil.CodeForbidden:
+		return codes.PermissionDenied
+	case errorutil.CodeConflict:
+		return codes.AlreadyExists
+	case errorutil.CodePrecondition:
+		return codes.FailedPrecondition
+	default:
+		return codes.Internal
+	}
+}

@@ -1,0 +1,288 @@
+name: Deploy GoStarter to VPS (Podman)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      ref:
+        description: 'Git Branch or Tag (e.g. main, develop, v1.0.0)'
+        required: true
+        default: 'main'
+        type: string
+      custom_port:
+        description: 'Custom Host Port on VPS (leave blank for defaults: dev=8090, prod=8089)'
+        required: false
+        default: ''
+        type: string
+      skip_tests:
+        description: 'Skip Unit Tests before build'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # 1. Run Unit Tests & Quality Verification
+  # ----------------------------------------------------------------------------
+  test:
+    name: Verify release candidate
+    if: ${{ !inputs.skip_tests }}
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ inputs.ref }}
+
+  # ----------------------------------------------------------------------------
+  # 2. Build & Push Multi-Stage Container Image to GitHub Container Registry
+  # ----------------------------------------------------------------------------
+  build-and-push:
+    name: Build & Push Container
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: |
+      always() &&
+      (needs.test.result == 'success' || inputs.skip_tests == true)
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      image_full: ${{ steps.meta.outputs.image_full }}
+      host_port: ${{ steps.meta.outputs.host_port }}
+
+    steps:
+      - name: Checkout target ref (${{ inputs.ref }})
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Determine Image Tags & Port Mapping
+        id: meta
+        env:
+          ENV_NAME: ${{ inputs.environment }}
+          CUSTOM_PORT: ${{ inputs.custom_port }}
+          TARGET_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          # Inputs are passed through the environment, never interpolated as shell code.
+          case "$ENV_NAME" in dev|prod) ;; *) exit 1 ;; esac
+          if [ -n "$CUSTOM_PORT" ] && ! [[ "$CUSTOM_PORT" =~ ^[0-9]{1,5}$ ]]; then exit 1; fi
+          if [ -n "$CUSTOM_PORT" ] && (( 10#$CUSTOM_PORT < 1 || 10#$CUSTOM_PORT > 65535 )); then exit 1; fi
+          # GHCR requires repository names to be lowercase
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="ghcr.io/${REPO_LOWER}"
+          SHORT_SHA=$(git rev-parse --short=12 HEAD)
+
+          # Compute image tags
+          TAG_LATEST="${IMAGE_NAME}:${ENV_NAME}-latest"
+          TAG_SHA="${IMAGE_NAME}:${ENV_NAME}-${SHORT_SHA}"
+
+          # Clean input ref for docker tag (replace '/' with '-')
+          CLEAN_REF=$(echo "$TARGET_REF" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          TAG_REF="${IMAGE_NAME}:${CLEAN_REF}"
+
+          echo "image_full=${TAG_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${ENV_NAME}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "tag_latest=${TAG_LATEST}" >> "$GITHUB_OUTPUT"
+          echo "tag_sha=${TAG_SHA}" >> "$GITHUB_OUTPUT"
+          echo "tag_ref=${TAG_REF}" >> "$GITHUB_OUTPUT"
+
+          # Determine Host Port
+          if [ -n "$CUSTOM_PORT" ]; then
+            TARGET_PORT="$CUSTOM_PORT"
+          elif [ "${ENV_NAME}" = "prod" ]; then
+            TARGET_PORT="8089"
+          else
+            TARGET_PORT="8090"
+          fi
+          echo "host_port=${TARGET_PORT}" >> "$GITHUB_OUTPUT"
+
+          echo "Target Image: ${TAG_SHA}"
+          echo "Target Port : ${TARGET_PORT}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Container Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.tag_latest }}
+            ${{ steps.meta.outputs.tag_sha }}
+            ${{ steps.meta.outputs.tag_ref }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ----------------------------------------------------------------------------
+  # 3. Deploy to VPS using Podman over SSH
+  # ⚠️  Semua ENV wajib dari GitHub Secrets — tidak ada fallback ke file repo.
+  # ----------------------------------------------------------------------------
+  deploy-vps:
+    name: Deploy to VPS with Podman
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    steps:
+      - name: Validate Required GitHub Secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          ENV_DEV: ${{ secrets.ENV_DEV }}
+          ENV_PROD: ${{ secrets.ENV_PROD }}
+          TARGET_ENV: ${{ inputs.environment }}
+        run: |
+          MISSING=()
+
+          [ -z "${VPS_HOST}" ]    && MISSING+=("VPS_HOST")
+          [ -z "${VPS_USER}" ]    && MISSING+=("VPS_USER")
+          [ -z "${VPS_SSH_KEY}" ] && MISSING+=("VPS_SSH_KEY")
+
+          if [ "${TARGET_ENV}" = "prod" ] && [ -z "${ENV_PROD}" ]; then
+            MISSING+=("ENV_PROD (required for prod deployment)")
+          fi
+          if [ "${TARGET_ENV}" = "dev" ] && [ -z "${ENV_DEV}" ]; then
+            MISSING+=("ENV_DEV (required for dev deployment)")
+          fi
+
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "❌ Deployment FAILED — Missing required GitHub Secrets:"
+            for secret in "${MISSING[@]}"; do
+              echo "   • ${secret}"
+            done
+            echo ""
+            echo "Tambahkan secret yang hilang di:"
+            echo "  GitHub Repo → Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+          echo "✅ All required secrets are present. Proceeding with deployment."
+
+      - name: Deploy on VPS via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          ENV_NAME: ${{ inputs.environment }}
+          IMAGE: ${{ needs.build-and-push.outputs.image_full }}
+          HOST_PORT: ${{ needs.build-and-push.outputs.host_port }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENV_SECRET: ${{ inputs.environment == 'prod' && secrets.ENV_PROD || secrets.ENV_DEV }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: ENV_NAME,IMAGE,HOST_PORT,GHCR_USER,GHCR_TOKEN,ENV_SECRET
+          script: |
+            set -euo pipefail
+
+            APP_DIR="/opt/gostarter"
+            ENV_FILE="${APP_DIR}/.env.${ENV_NAME}"
+            CONTAINER_NAME="gostarter-${ENV_NAME}"
+            VOLUME_NAME="gostarter-${ENV_NAME}-snapshots"
+            WORKER_NAME="${CONTAINER_NAME}-worker"
+
+            echo "================================================================="
+            echo "  🚀 GoStarter Podman Deployment"
+            echo "================================================================="
+            echo "  Environment    : ${ENV_NAME}"
+            echo "  Target Image   : ${IMAGE}"
+            echo "  Mapped Port    : ${HOST_PORT}:8089"
+            echo "  Container Name : ${CONTAINER_NAME}"
+            echo "  Env Source     : GitHub Secrets (ENV_$(echo "${ENV_NAME}" | tr 'a-z' 'A-Z'))"
+            echo "================================================================="
+
+            # 1. Pastikan Podman terinstal di VPS
+            if ! command -v podman &> /dev/null; then
+              echo "❌ Error: Podman is not installed on this VPS!" >&2
+              exit 1
+            fi
+
+            # 2. Login ke GHCR di VPS menggunakan token dari GitHub Actions
+            echo "${GHCR_TOKEN}" | podman login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+            # 3. Tulis env file dari GitHub Secret (wajib — tidak ada fallback)
+            echo "📝 Writing .env.${ENV_NAME} from GitHub Secrets..."
+            mkdir -p "${APP_DIR}"
+            printf '%s\n' "${ENV_SECRET}" > "${ENV_FILE}"
+            chmod 600 "${ENV_FILE}"
+            echo "✅ Env file written: ${ENV_FILE} ($(wc -l < "${ENV_FILE}") lines)"
+
+            # 4. Pull image terbaru
+            echo "📦 Pulling container image: ${IMAGE}..."
+            podman pull "${IMAGE}"
+
+            # Stop both old processes before changing validator authority.
+            if podman container exists "$WORKER_NAME"; then
+              podman stop --time 30 "$WORKER_NAME"
+              podman rm "$WORKER_NAME"
+            fi
+            # 5. Hentikan dan hapus container lama jika ada
+            if podman container exists "${CONTAINER_NAME}" 2>/dev/null; then
+              echo "🛑 Stopping existing container '${CONTAINER_NAME}'..."
+              podman stop --time 10 "${CONTAINER_NAME}" || true
+              podman rm -f "${CONTAINER_NAME}" || true
+            fi
+
+            # 6. Buat volume cache jika belum ada
+            podman volume create "${VOLUME_NAME}" >/dev/null 2>&1 || true
+
+            # Apply schema migrations before starting the application.
+            podman run --rm --env-file "$ENV_FILE" \
+              --entrypoint /app/gostarter "$IMAGE" -migrate-only
+
+            # The server now owns validation and manual sync; its snapshot volume is writable.
+            # 7. Jalankan container baru dengan Podman
+            echo "▶️  Launching container '${CONTAINER_NAME}' on port ${HOST_PORT}..."
+            podman run -d \
+              --name "${CONTAINER_NAME}" \
+              --restart always \
+              -p "${HOST_PORT}:8089" \
+              --env-file "${ENV_FILE}" \
+              -e APP_PORT=8089 -e SNAPSHOT_DIR=/app/snapshots \
+              -v "${VOLUME_NAME}:/app/snapshots:z,U" \
+              "${IMAGE}"
+
+            # 8. Verifikasi status dan healthcheck
+            echo "🔍 Verifying application health..."
+            HEALTHY=false
+            for i in $(seq 1 120); do
+              sleep 5
+              if curl -fs "http://127.0.0.1:${HOST_PORT}/readyz" >/dev/null 2>&1; then
+                HEALTHY=true
+                break
+              fi
+              echo "   Check attempt ${i}/120: Waiting for server to become ready..."
+            done
+
+            if [ "${HEALTHY}" = "true" ]; then
+              echo "✅ GoStarter (${ENV_NAME}) is UP and HEALTHY on port ${HOST_PORT}!"
+            else
+              echo "⚠️  Healthcheck verification timed out. Container logs:"
+              podman logs --tail 30 "${CONTAINER_NAME}"
+              podman logs --tail 30 "$WORKER_NAME"
+              exit 1
+            fi
+
+            # 9. Bersihkan dangling image lama
+            podman image prune -f >/dev/null 2>&1 || true
+
+            echo "================================================================="
+            echo "  🎉 Deployment Finished Successfully!"
+            echo "================================================================="

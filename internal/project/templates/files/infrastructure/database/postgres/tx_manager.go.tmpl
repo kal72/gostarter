@@ -1,0 +1,56 @@
+package postgres
+
+import (
+	"context"
+
+	"<<%.Module%>>/pkg/transaction"
+
+	"gorm.io/gorm"
+)
+
+type txContextKey struct{}
+
+// TransactionManager implements transaction.Manager using GORM.
+type TransactionManager struct {
+	db *gorm.DB
+}
+
+// Compile-time check that TransactionManager implements transaction.Manager.
+var _ transaction.Manager = (*TransactionManager)(nil)
+
+// NewTransactionManager creates a new PostgreSQL transaction manager.
+func NewTransactionManager(db *gorm.DB) *TransactionManager {
+	return &TransactionManager{db: db}
+}
+
+// RunInTransaction executes the given function within a GORM database transaction.
+// If a transaction is already present in ctx, it reuses it to support nested operations.
+func (tm *TransactionManager) RunInTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	// Reuse existing transaction if already inside one
+	if _, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok {
+		return fn(ctx)
+	}
+
+	return tm.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txCtx := context.WithValue(ctx, txContextKey{}, tx)
+		return fn(txCtx)
+	})
+}
+
+// GetDB retrieves the active *gorm.DB transaction from ctx if available,
+// or falls back to defaultDB.WithContext(ctx).
+func GetDB(ctx context.Context, defaultDB *gorm.DB) *gorm.DB {
+	if tx, ok := ctx.Value(txContextKey{}).(*gorm.DB); ok && tx != nil {
+		return tx
+	}
+	if defaultDB != nil {
+		return defaultDB.WithContext(ctx)
+	}
+	return nil
+}
+
+// TxFromContext returns the active *gorm.DB transaction from context if one exists.
+func TxFromContext(ctx context.Context) (*gorm.DB, bool) {
+	tx, ok := ctx.Value(txContextKey{}).(*gorm.DB)
+	return tx, ok
+}

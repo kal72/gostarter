@@ -1,0 +1,2440 @@
+{
+  "inventory_version": 1,
+  "date": "2026-10-07",
+  "upstream": {
+    "commit_sha": "05cf3ee561ddd7a454c2d9641c540d4c7d750ebb",
+    "ref": "dev",
+    "state": "committed baseline before scoped config repair",
+    "file_count": 169,
+    "files": [
+      {
+        "path": ".env.example",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": ".gitignore",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "AGENTS.md",
+        "owner": "repository_metadata",
+        "action": "exclude_from_generated_project"
+      },
+      {
+        "path": "Makefile",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "README.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "api/external/company-service/company.proto",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "api/proto/auth/auth.proto",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/auth/auth_payload.proto",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/health/health.proto",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "api/proto/openapi.proto",
+        "owner": "application:openapi",
+        "action": "render_global_metadata_and_regenerate"
+      },
+      {
+        "path": "api/proto/plugins/google/api/annotations.proto",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "api/proto/plugins/google/api/http.proto",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "api/proto/user/user.proto",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/user/user_payload.proto",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "bootstrap/app.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/gateway.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/gateway_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/grpc.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/services.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/wire.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/wire_gen.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "cmd/api/main.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "deployments/Dockerfile",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "deployments/docker-compose.yml",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "docs/architecture.id.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "docs/architecture.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "gen/.keep",
+        "owner": "repository_metadata",
+        "action": "exclude_from_generated_project"
+      },
+      {
+        "path": "gen/externalpb/company-service/company.pb.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "gen/externalpb/company-service/company_grpc.pb.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "gen/openapi/api.swagger.json",
+        "owner": "application:openapi",
+        "action": "regenerate_from_selected_proto"
+      },
+      {
+        "path": "gen/openapi/openapi.go",
+        "owner": "application:openapi",
+        "action": "regenerate_from_selected_proto"
+      },
+      {
+        "path": "gen/pb/auth/auth.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth.pb.gw.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth_grpc.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth_payload.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/google/api/annotations.pb.go",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "gen/pb/google/api/http.pb.go",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "gen/pb/health/health.pb.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/health/health.pb.gw.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/health/health_grpc.pb.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/openapi.pb.go",
+        "owner": "application:openapi",
+        "action": "render_global_metadata_and_regenerate"
+      },
+      {
+        "path": "gen/pb/user/user.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user.pb.gw.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user_grpc.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user_payload.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "go.mod",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "go.sum",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "gostarter.yaml",
+        "owner": "contract",
+        "action": "read_metadata_exclude_from_output"
+      },
+      {
+        "path": "infrastructure/cache/redis/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/cache/redis/redis.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/config/config.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/config/config_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/config/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/mongo/db.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/database/mongo/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/database/postgres/db.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/tx_manager.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/tx_manager_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/external/company-service/client.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/client_test.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/connection.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/mock/client_mock.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/middleware/auth_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/auth_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/error_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/error_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/logging_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/logging_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/recovery_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/timeout_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/timeout_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/swagger/static/index.html",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/swagger/swagger.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/metrics.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/tracer.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "internal/auth/dto/request.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/dto/response.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/entity/token.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/errors/errors.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/handler/handler.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/provider.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/repository/interface.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/repository/postgres/repository.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/config.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/login.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/login_test.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/logout.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/refresh.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/refresh_test.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/user_provider.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/validator/validator.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/health/checker/pinger.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/handler/handler.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/handler/handler_test.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/provider.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/user/dto/request.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/dto/response.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/entity/user.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/errors/errors.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/handler/handler.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/provider.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/repository/interface.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/repository/postgres/repository.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/create.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/create_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/delete.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/delete_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/find.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/update.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/update_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/validator/validator.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "migrations/000001_create_users_table.down.sql",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000001_create_users_table.up.sql",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000002_create_refresh_tokens_table.down.sql",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000002_create_refresh_tokens_table.up.sql",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "pkg/contextutil/context.go",
+        "owner": "core:contextutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/contextutil/context_test.go",
+        "owner": "core:contextutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/cryptoutil/hash.go",
+        "owner": "pkg:cryptoutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/cryptoutil/hash_test.go",
+        "owner": "pkg:cryptoutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/errorutil/code.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/errorutil/error.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/errorutil/validation.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/httpclient/client.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/client_test.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/options.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/transport.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/executor.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/idempotency.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/idempotency_test.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/memory.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/redis.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/jwtutil/jwt.go",
+        "owner": "core:jwtutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/jwtutil/jwt_test.go",
+        "owner": "core:jwtutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/logger.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/logger_test.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/zap.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/pagination/cursor.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/gorm.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/pagination.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/pagination_test.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/sort.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pointer/pointer.go",
+        "owner": "pkg:pointer",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/routine/group.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/group_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/metrics.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/metrics_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/pool.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/pool_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/retry.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/retry_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/routine.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/routine_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/singleflight.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/singleflight_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/stringutil/stringutil.go",
+        "owner": "pkg:stringutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/timeutil/timeutil.go",
+        "owner": "pkg:timeutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/transaction/manager.go",
+        "owner": "core:transaction",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/validator/validator.go",
+        "owner": "pkg:validator",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "scripts/new-feature.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/protogen.bat",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/protogen.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/rename-module.bat",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/rename-module.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "tests/e2e/e2e_test.go",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "tests/integration/integration_test.go",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      }
+    ],
+    "cross_component_imports": [
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "application:openapi",
+        "packages": [
+          "gen/openapi"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:health",
+        "packages": [
+          "internal/health",
+          "internal/health/checker",
+          "internal/health/handler"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:jwtutil",
+        "packages": [
+          "pkg/jwtutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:logger",
+        "packages": [
+          "pkg/logger"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:routine",
+        "packages": [
+          "pkg/routine"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:transaction",
+        "packages": [
+          "pkg/transaction"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "feature:auth",
+        "packages": [
+          "internal/auth",
+          "internal/auth/handler",
+          "internal/auth/repository/postgres",
+          "internal/auth/usecase",
+          "internal/auth/validator"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "feature:user",
+        "packages": [
+          "gen/pb/user",
+          "internal/user",
+          "internal/user/handler",
+          "internal/user/repository/postgres",
+          "internal/user/usecase",
+          "internal/user/validator"
+        ]
+      },
+      {
+        "from": "core:logger",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/config",
+          "infrastructure/database/postgres"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:jwtutil",
+        "packages": [
+          "pkg/jwtutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:transaction",
+        "packages": [
+          "pkg/transaction"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "feature:user",
+        "packages": [
+          "internal/user/entity",
+          "internal/user/repository"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "pkg:cryptoutil",
+        "packages": [
+          "pkg/cryptoutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "pkg:validator",
+        "packages": [
+          "pkg/validator"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/database/postgres"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "pkg:cryptoutil",
+        "packages": [
+          "pkg/cryptoutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "pkg:validator",
+        "packages": [
+          "pkg/validator"
+        ]
+      },
+      {
+        "from": "pkg:httpclient",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "pkg:httpclient",
+        "to": "core:logger",
+        "packages": [
+          "pkg/logger"
+        ]
+      },
+      {
+        "from": "profile:optional_infrastructure_or_example",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/config"
+        ]
+      }
+    ],
+    "external_imports_by_owner": {
+      "application:architecture_infrastructure": [
+        "github.com/golang-jwt/jwt/v5",
+        "github.com/google/uuid",
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/prometheus/client_golang/prometheus/promhttp",
+        "github.com/spf13/viper",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc",
+        "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "go.opentelemetry.io/otel",
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
+        "go.opentelemetry.io/otel/exporters/prometheus",
+        "go.opentelemetry.io/otel/propagation",
+        "go.opentelemetry.io/otel/sdk/metric",
+        "go.opentelemetry.io/otel/sdk/resource",
+        "go.opentelemetry.io/otel/sdk/trace",
+        "go.opentelemetry.io/otel/semconv/v1.21.0",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/credentials/insecure",
+        "google.golang.org/grpc/keepalive",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/peer",
+        "google.golang.org/grpc/reflection",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/encoding/protojson",
+        "google.golang.org/protobuf/proto",
+        "gorm.io/driver/postgres",
+        "gorm.io/gorm",
+        "gorm.io/gorm/logger",
+        "gorm.io/plugin/opentelemetry/tracing"
+      ],
+      "core:contextutil": [
+        "github.com/stretchr/testify/assert"
+      ],
+      "core:health": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "gorm.io/gorm"
+      ],
+      "core:jwtutil": [
+        "github.com/golang-jwt/jwt/v5",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require"
+      ],
+      "core:logger": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/otel/trace",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/peer"
+      ],
+      "core:routine": [
+        "github.com/prometheus/client_golang/prometheus",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require"
+      ],
+      "feature:auth": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/mock",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "gorm.io/gorm"
+      ],
+      "feature:user": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/mock",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "google.golang.org/protobuf/types/known/timestamppb",
+        "gorm.io/gorm"
+      ],
+      "pkg:cryptoutil": [
+        "github.com/stretchr/testify/assert",
+        "golang.org/x/crypto/bcrypt"
+      ],
+      "pkg:httpclient": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/otel/propagation",
+        "go.opentelemetry.io/otel/trace",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer"
+      ],
+      "pkg:idempotency": [
+        "github.com/redis/go-redis/v9",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "google.golang.org/grpc/metadata"
+      ],
+      "pkg:pagination": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "gorm.io/gorm"
+      ],
+      "pkg:validator": [
+        "github.com/go-playground/validator/v10"
+      ],
+      "profile:optional_infrastructure_or_example": [
+        "github.com/google/wire",
+        "github.com/redis/go-redis/extra/redisotel/v9",
+        "github.com/redis/go-redis/v9",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.mongodb.org/mongo-driver/mongo",
+        "go.mongodb.org/mongo-driver/mongo/options",
+        "go.mongodb.org/mongo-driver/mongo/readpref",
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc",
+        "go.uber.org/mock/gomock",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/credentials/insecure",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl"
+      ],
+      "unclassified": [
+        "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "google.golang.org/protobuf/types/descriptorpb"
+      ]
+    },
+    "import_scan": {
+      "parser": "Go go/parser ImportsOnly",
+      "includes": "all .go files, including tests and files with build tags; static import graph, not runtime dependency resolution",
+      "go_files_scanned": 136
+    }
+  },
+  "legacy_cache": {
+    "path": ".cache/boilerplate.zip",
+    "commit_sha": null,
+    "provenance": "unverified_analysis_fixture",
+    "archive_sha256": "093179f9a5027412e082a639d926315b84b62d5a1f34f417d711be48e594fa16",
+    "file_count": 168,
+    "files": [
+      {
+        "path": ".env.example",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": ".gitignore",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "AGENTS.md",
+        "owner": "repository_metadata",
+        "action": "exclude_from_generated_project"
+      },
+      {
+        "path": "Makefile",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "README.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "api/external/company-service/company.proto",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "api/proto/auth/auth.proto",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/auth/auth_payload.proto",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/health/health.proto",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "api/proto/openapi.proto",
+        "owner": "application:openapi",
+        "action": "render_global_metadata_and_regenerate"
+      },
+      {
+        "path": "api/proto/plugins/google/api/annotations.proto",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "api/proto/plugins/google/api/http.proto",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "api/proto/user/user.proto",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "api/proto/user/user_payload.proto",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "bootstrap/app.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/gateway.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/gateway_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/grpc.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/services.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/wire.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "bootstrap/wire_gen.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "cmd/api/main.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "deployments/Dockerfile",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "deployments/docker-compose.yml",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "docs/architecture.id.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "docs/architecture.md",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "gen/.keep",
+        "owner": "repository_metadata",
+        "action": "exclude_from_generated_project"
+      },
+      {
+        "path": "gen/externalpb/company-service/company.pb.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "gen/externalpb/company-service/company_grpc.pb.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "gen/openapi/api.swagger.json",
+        "owner": "application:openapi",
+        "action": "regenerate_from_selected_proto"
+      },
+      {
+        "path": "gen/openapi/openapi.go",
+        "owner": "application:openapi",
+        "action": "regenerate_from_selected_proto"
+      },
+      {
+        "path": "gen/pb/auth/auth.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth.pb.gw.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth_grpc.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/auth/auth_payload.pb.go",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/google/api/annotations.pb.go",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "gen/pb/google/api/http.pb.go",
+        "owner": "shared:proto_annotations",
+        "action": "include_when_proto_tooling_requires"
+      },
+      {
+        "path": "gen/pb/health/health.pb.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/health/health.pb.gw.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/health/health_grpc.pb.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "gen/pb/openapi.pb.go",
+        "owner": "application:openapi",
+        "action": "render_global_metadata_and_regenerate"
+      },
+      {
+        "path": "gen/pb/user/user.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user.pb.gw.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user_grpc.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "gen/pb/user/user_payload.pb.go",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "go.mod",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "go.sum",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/cache/redis/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/cache/redis/redis.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/config/config.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/config/config_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/config/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/mongo/db.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/database/mongo/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/database/postgres/db.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/tx_manager.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/database/postgres/tx_manager_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/external/company-service/client.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/client_test.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/connection.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/mock/client_mock.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/external/company-service/provider.go",
+        "owner": "profile:optional_infrastructure_or_example",
+        "action": "explicit_profile_support_required"
+      },
+      {
+        "path": "infrastructure/middleware/auth_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/auth_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/error_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/error_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/logging_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/logging_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/recovery_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/timeout_interceptor.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/middleware/timeout_interceptor_test.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/swagger/static/index.html",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/swagger/swagger.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/metrics.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/provider.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "infrastructure/telemetry/tracer.go",
+        "owner": "application:architecture_infrastructure",
+        "action": "render_application_template_following_upstream"
+      },
+      {
+        "path": "internal/auth/dto/request.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/dto/response.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/entity/token.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/errors/errors.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/handler/handler.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/provider.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/repository/interface.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/repository/postgres/repository.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/config.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/login.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/login_test.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/logout.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/refresh.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/refresh_test.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/usecase/user_provider.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/auth/validator/validator.go",
+        "owner": "feature:auth",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/health/checker/pinger.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/handler/handler.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/handler/handler_test.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/health/provider.go",
+        "owner": "core:health",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "internal/user/dto/request.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/dto/response.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/entity/user.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/errors/errors.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/handler/handler.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/provider.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/repository/interface.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/repository/postgres/repository.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/create.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/create_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/delete.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/delete_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/find.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/update.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/usecase/update_test.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "internal/user/validator/validator.go",
+        "owner": "feature:user",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "migrations/000001_create_users_table.down.sql",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000001_create_users_table.up.sql",
+        "owner": "feature:user",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000002_create_refresh_tokens_table.down.sql",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "migrations/000002_create_refresh_tokens_table.up.sql",
+        "owner": "feature:auth",
+        "action": "include_selected_asset"
+      },
+      {
+        "path": "pkg/contextutil/context.go",
+        "owner": "core:contextutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/contextutil/context_test.go",
+        "owner": "core:contextutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/cryptoutil/hash.go",
+        "owner": "pkg:cryptoutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/cryptoutil/hash_test.go",
+        "owner": "pkg:cryptoutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/errorutil/code.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/errorutil/error.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/errorutil/validation.go",
+        "owner": "core:errorutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/httpclient/client.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/client_test.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/options.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/httpclient/transport.go",
+        "owner": "pkg:httpclient",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/executor.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/idempotency.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/idempotency_test.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/memory.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/idempotency/redis.go",
+        "owner": "pkg:idempotency",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/jwtutil/jwt.go",
+        "owner": "core:jwtutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/jwtutil/jwt_test.go",
+        "owner": "core:jwtutil",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/logger.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/logger_test.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/logger/zap.go",
+        "owner": "core:logger",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/pagination/cursor.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/gorm.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/pagination.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/pagination_test.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pagination/sort.go",
+        "owner": "pkg:pagination",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/pointer/pointer.go",
+        "owner": "pkg:pointer",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/routine/group.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/group_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/metrics.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/metrics_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/pool.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/pool_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/retry.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/retry_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/routine.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/routine_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/singleflight.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/routine/singleflight_test.go",
+        "owner": "core:routine",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/stringutil/stringutil.go",
+        "owner": "pkg:stringutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/timeutil/timeutil.go",
+        "owner": "pkg:timeutil",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "pkg/transaction/manager.go",
+        "owner": "core:transaction",
+        "action": "copy_default_source"
+      },
+      {
+        "path": "pkg/validator/validator.go",
+        "owner": "pkg:validator",
+        "action": "copy_selected_source"
+      },
+      {
+        "path": "scripts/new-feature.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/protogen.bat",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/protogen.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/rename-module.bat",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "scripts/rename-module.sh",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "tests/e2e/e2e_test.go",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      },
+      {
+        "path": "tests/integration/integration_test.go",
+        "owner": "application:support_assets",
+        "action": "explicit_profile_selection_or_adaptation"
+      }
+    ],
+    "cross_component_imports": [
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "application:openapi",
+        "packages": [
+          "gen/openapi"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:health",
+        "packages": [
+          "internal/health",
+          "internal/health/checker",
+          "internal/health/handler"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:jwtutil",
+        "packages": [
+          "pkg/jwtutil"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:logger",
+        "packages": [
+          "pkg/logger"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:routine",
+        "packages": [
+          "pkg/routine"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "core:transaction",
+        "packages": [
+          "pkg/transaction"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "feature:auth",
+        "packages": [
+          "internal/auth",
+          "internal/auth/handler",
+          "internal/auth/repository/postgres",
+          "internal/auth/usecase",
+          "internal/auth/validator"
+        ]
+      },
+      {
+        "from": "application:architecture_infrastructure",
+        "to": "feature:user",
+        "packages": [
+          "gen/pb/user",
+          "internal/user",
+          "internal/user/handler",
+          "internal/user/repository/postgres",
+          "internal/user/usecase",
+          "internal/user/validator"
+        ]
+      },
+      {
+        "from": "core:logger",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/config",
+          "infrastructure/database/postgres"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:jwtutil",
+        "packages": [
+          "pkg/jwtutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "core:transaction",
+        "packages": [
+          "pkg/transaction"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "feature:user",
+        "packages": [
+          "internal/user/entity",
+          "internal/user/repository"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "pkg:cryptoutil",
+        "packages": [
+          "pkg/cryptoutil"
+        ]
+      },
+      {
+        "from": "feature:auth",
+        "to": "pkg:validator",
+        "packages": [
+          "pkg/validator"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/database/postgres"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "core:errorutil",
+        "packages": [
+          "pkg/errorutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "pkg:cryptoutil",
+        "packages": [
+          "pkg/cryptoutil"
+        ]
+      },
+      {
+        "from": "feature:user",
+        "to": "pkg:validator",
+        "packages": [
+          "pkg/validator"
+        ]
+      },
+      {
+        "from": "pkg:httpclient",
+        "to": "core:contextutil",
+        "packages": [
+          "pkg/contextutil"
+        ]
+      },
+      {
+        "from": "pkg:httpclient",
+        "to": "core:logger",
+        "packages": [
+          "pkg/logger"
+        ]
+      },
+      {
+        "from": "profile:optional_infrastructure_or_example",
+        "to": "application:architecture_infrastructure",
+        "packages": [
+          "infrastructure/config"
+        ]
+      }
+    ],
+    "external_imports_by_owner": {
+      "application:architecture_infrastructure": [
+        "github.com/golang-jwt/jwt/v5",
+        "github.com/google/uuid",
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/prometheus/client_golang/prometheus/promhttp",
+        "github.com/spf13/viper",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc",
+        "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "go.opentelemetry.io/otel",
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
+        "go.opentelemetry.io/otel/exporters/prometheus",
+        "go.opentelemetry.io/otel/propagation",
+        "go.opentelemetry.io/otel/sdk/metric",
+        "go.opentelemetry.io/otel/sdk/resource",
+        "go.opentelemetry.io/otel/sdk/trace",
+        "go.opentelemetry.io/otel/semconv/v1.21.0",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/credentials/insecure",
+        "google.golang.org/grpc/keepalive",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/peer",
+        "google.golang.org/grpc/reflection",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/encoding/protojson",
+        "google.golang.org/protobuf/proto",
+        "gorm.io/driver/postgres",
+        "gorm.io/gorm",
+        "gorm.io/gorm/logger",
+        "gorm.io/plugin/opentelemetry/tracing"
+      ],
+      "core:contextutil": [
+        "github.com/stretchr/testify/assert"
+      ],
+      "core:health": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "gorm.io/gorm"
+      ],
+      "core:jwtutil": [
+        "github.com/golang-jwt/jwt/v5",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require"
+      ],
+      "core:logger": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/otel/trace",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/peer"
+      ],
+      "core:routine": [
+        "github.com/prometheus/client_golang/prometheus",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require"
+      ],
+      "feature:auth": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/mock",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "gorm.io/gorm"
+      ],
+      "feature:user": [
+        "github.com/google/wire",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/runtime",
+        "github.com/grpc-ecosystem/grpc-gateway/v2/utilities",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/mock",
+        "google.golang.org/genproto/googleapis/api/annotations",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/grpclog",
+        "google.golang.org/grpc/metadata",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/proto",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "google.golang.org/protobuf/types/known/timestamppb",
+        "gorm.io/gorm"
+      ],
+      "pkg:cryptoutil": [
+        "github.com/stretchr/testify/assert",
+        "golang.org/x/crypto/bcrypt"
+      ],
+      "pkg:httpclient": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.opentelemetry.io/otel/propagation",
+        "go.opentelemetry.io/otel/trace",
+        "go.uber.org/zap",
+        "go.uber.org/zap/zapcore",
+        "go.uber.org/zap/zaptest/observer"
+      ],
+      "pkg:idempotency": [
+        "github.com/redis/go-redis/v9",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "google.golang.org/grpc/metadata"
+      ],
+      "pkg:pagination": [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "gorm.io/gorm"
+      ],
+      "pkg:validator": [
+        "github.com/go-playground/validator/v10"
+      ],
+      "profile:optional_infrastructure_or_example": [
+        "github.com/google/wire",
+        "github.com/redis/go-redis/extra/redisotel/v9",
+        "github.com/redis/go-redis/v9",
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+        "go.mongodb.org/mongo-driver/mongo",
+        "go.mongodb.org/mongo-driver/mongo/options",
+        "go.mongodb.org/mongo-driver/mongo/readpref",
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc",
+        "go.uber.org/mock/gomock",
+        "google.golang.org/grpc",
+        "google.golang.org/grpc/codes",
+        "google.golang.org/grpc/credentials/insecure",
+        "google.golang.org/grpc/status",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl"
+      ],
+      "unclassified": [
+        "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options",
+        "google.golang.org/protobuf/reflect/protoreflect",
+        "google.golang.org/protobuf/runtime/protoimpl",
+        "google.golang.org/protobuf/types/descriptorpb"
+      ]
+    },
+    "import_scan": {
+      "parser": "Go go/parser ImportsOnly",
+      "includes": "all .go files, including tests and files with build tags; static import graph, not runtime dependency resolution",
+      "go_files_scanned": 136
+    }
+  }
+}

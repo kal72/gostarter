@@ -1,0 +1,58 @@
+package bootstrap
+
+import (
+	"context"
+
+	healthHandler "<<%.Module%>>/internal/health/handler"
+	<<%range .Features%>><<%.Alias%>>Handler "<<%$.Module%>>/<<%.Handler%>>"
+	<<%end%>>
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc"
+)
+
+// ServiceRegister defines the contract for domain handlers to register themselves
+// to both the gRPC server and the HTTP REST gateway.
+type ServiceRegister interface {
+	// RegisterGRPC registers the service implementation onto the gRPC server.
+	RegisterGRPC(server *grpc.Server)
+
+	// RegisterGateway registers the REST gateway endpoints mapping to the gRPC service.
+	RegisterGateway(ctx context.Context, mux *runtime.ServeMux, grpcAddr string, opts []grpc.DialOption) error
+}
+
+// Services manages the unified registration of all application transport services.
+type Services struct {
+	items []ServiceRegister
+}
+
+// NewServices constructs a Services collection from the provided service registers.
+func NewServices(items ...ServiceRegister) *Services {
+	return &Services{items: items}
+}
+
+// RegisterGRPC registers all services onto the gRPC server.
+func (s *Services) RegisterGRPC(server *grpc.Server) {
+	for _, svc := range s.items {
+		svc.RegisterGRPC(server)
+	}
+}
+
+// RegisterGateway registers all services onto the HTTP REST gateway.
+func (s *Services) RegisterGateway(ctx context.Context, mux *runtime.ServeMux, grpcAddr string, opts []grpc.DialOption) error {
+	for _, svc := range s.items {
+		if err := svc.RegisterGateway(ctx, mux, grpcAddr, opts); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ProvideServices assembles all domain feature handlers into the unified Services container for Wire DI.
+func ProvideServices(
+	healthH *healthHandler.Handler,
+	<<%range .Features%>><<%.Alias%>>H *<<%.Alias%>>Handler.Handler,
+	<<%end%>>
+) *Services {
+	return NewServices(healthH<<%range .Features%>>, <<%.Alias%>>H<<%end%>>)
+}

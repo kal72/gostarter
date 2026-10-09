@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+!.env.example
+.cache
+bin
+docs/screenshots
+coverage.*
+*.zip
+upstream
+
+node_modules

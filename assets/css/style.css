@@ -1,0 +1,125 @@
+/* GoStarter Custom Styling & Utilities complementary to Tailwind CSS */
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+/* Tree Node Styling */
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: inherit;
+  transition: all 0.12s;
+}
+
+.tree-node:hover {
+  background: rgba(0, 173, 216, 0.08);
+  color: #00add8;
+}
+
+.tree-node.active {
+  background: rgba(0, 173, 216, 0.18);
+  color: #00add8;
+  font-weight: 600;
+}
+
+.tree-children {
+  padding-left: 14px;
+  border-left: 1px dashed rgba(148, 163, 184, 0.2);
+  margin-left: 8px;
+}
+
+.node-icon {
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+/* Protocol Card Selection */
+.protocol-card.active {
+  border-color: #00add8 !important;
+  background-color: rgba(0, 173, 216, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(0, 173, 216, 0.25) !important;
+}
+
+/* Segmented Version Control & Go Version Cards */
+.segment-btn.active {
+  background-color: #00add8 !important;
+  color: #05070a !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 4px rgba(0, 173, 216, 0.3) !important;
+}
+
+.go-version-card {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.go-version-card:hover {
+  transform: translateY(-1px);
+}
+.go-version-card.active {
+  border-color: #00add8 !important;
+  box-shadow: 0 0 0 2px rgba(0, 173, 216, 0.25), 0 4px 12px rgba(0, 173, 216, 0.08) !important;
+}
+.go-version-card.active .go-check-circle {
+  border-color: #00add8 !important;
+  background-color: #00add8 !important;
+  color: #05070a !important;
+}
+.go-version-card.active .go-check-circle svg {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+.go-version-card .go-check-circle svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s ease;
+}
+
+/* Toast Animation */
+.toast-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Dialog Backdrop & Animation */
+dialog::backdrop {
+  background: rgba(5, 7, 10, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+dialog[open] {
+  animation: modalFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Keep pending/locked actions visibly distinct. */
+button:disabled { opacity: .45; cursor: not-allowed; }

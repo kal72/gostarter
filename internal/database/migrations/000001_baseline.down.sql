@@ -1,0 +1,11 @@
+BEGIN;
+DROP TABLE IF EXISTS validation_jobs;
+DROP TABLE IF EXISTS generation_plans;
+DROP TABLE IF EXISTS upstream_state;
+DROP TABLE IF EXISTS template_snapshots;
+DROP FUNCTION IF EXISTS gostarter_plan_immutable();
+DROP FUNCTION IF EXISTS gostarter_snapshot_immutable();
+DROP TABLE IF EXISTS admin_sessions;
+DROP TABLE IF EXISTS admin_settings;
+DROP TABLE IF EXISTS admin_users;
+COMMIT;

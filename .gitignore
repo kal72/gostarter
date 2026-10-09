@@ -1,0 +1,33 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test artifacts & coverage
+coverage.out
+coverage.html
+*.test
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Cache and temporary directories
+.cache/
+*.zip
+*.tar.gz
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+# Local-only test fixtures; automated tests are self-contained.
+/testdata/
+/internal/**/testdata/
+
+node_modules/

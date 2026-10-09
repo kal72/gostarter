@@ -1,0 +1,203 @@
+package middleware
+
+import (
+	"context"
+	"encoding/json"
+	"strings"
+	"time"
+
+	"<<%.Module%>>/pkg/contextutil"
+	"<<%.Module%>>/pkg/logger"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+)
+
+// LoggingInterceptor is a gRPC unary server interceptor that logs each request
+// in structured JSON format with OpenTelemetry semantic conventions, execution latency,
+// status codes, peer IP, request ID, sanitized request payload, and response payload (on error).
+// It enriches the context with RPCMetadata so downstream handlers and usecases
+// automatically inherit transport context.
+func LoggingInterceptor(log logger.Logger) grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req any,
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (any, error) {
+		start := time.Now()
+
+		serviceName, methodName := parseFullMethod(info.FullMethod)
+
+		// 1. Extract Client IP
+		var clientIP string
+		if p, ok := peer.FromContext(ctx); ok && p.Addr != nil {
+			clientIP = p.Addr.String()
+		}
+
+		// 2. Extract Request ID and User Agent from metadata
+		var requestID string
+		var userAgent string
+		if md, ok := metadata.FromIncomingContext(ctx); ok {
+			if reqIDs := md.Get("x-request-id"); len(reqIDs) > 0 {
+				requestID = reqIDs[0]
+			}
+			if uas := md.Get("user-agent"); len(uas) > 0 {
+				userAgent = uas[0]
+			} else if uas := md.Get("grpcgateway-user-agent"); len(uas) > 0 {
+				userAgent = uas[0]
+			}
+		}
+
+		// 3. Enrich Context with RPCMetadata & RequestID for downstream loggers/usecases
+		rpcMeta := logger.RPCMetadata{
+			System:    "grpc",
+			Service:   serviceName,
+			Method:    methodName,
+			ClientIP:  clientIP,
+			UserAgent: userAgent,
+		}
+		ctx = logger.WithRPCMetadata(ctx, rpcMeta)
+		if requestID != "" {
+			ctx = contextutil.WithRequestID(ctx, requestID)
+		}
+
+		// Execute downstream handler
+		resp, err := handler(ctx, req)
+
+		duration := time.Since(start)
+		durationMs := float64(duration.Microseconds()) / 1000.0
+
+		st, _ := status.FromError(err)
+		code := st.Code()
+
+		// Build entry logger with execution-specific metrics
+		reqLog := log.
+			With("rpc.grpc.status_code", int(code)).
+			With("status", code.String()).
+			With("duration_ms", durationMs)
+
+		// Request Payload with sensitive data masked (always logged)
+		if sanitizedReq := sanitizePayload(req); sanitizedReq != nil {
+			reqLog = reqLog.
+				With("request", sanitizedReq).
+				With("rpc.request.payload", sanitizedReq) // backward compatibility
+		}
+
+		// Response Payload with sensitive data masked (logged ONLY on error)
+		if code != codes.OK {
+			if sanitizedResp := sanitizePayload(resp); sanitizedResp != nil {
+				reqLog = reqLog.With("response", sanitizedResp)
+			}
+		}
+
+		// Error Details if request failed
+		if err != nil {
+			reqLog = reqLog.With("error.message", st.Message())
+		}
+
+		// Dynamic Log Level based on gRPC status code
+		switch code {
+		case codes.OK:
+			reqLog.Info(ctx, "gRPC request completed")
+		case codes.InvalidArgument, codes.NotFound, codes.AlreadyExists,
+			codes.PermissionDenied, codes.Unauthenticated, codes.FailedPrecondition:
+			reqLog.Warn(ctx, "gRPC client error")
+		default:
+			reqLog.Error(ctx, "gRPC server error")
+		}
+
+		return resp, err
+	}
+}
+
+// parseFullMethod decomposes "/user.v1.UserService/GetUser" into ("user.v1.UserService", "GetUser")
+func parseFullMethod(fullMethod string) (string, string) {
+	trimmed := strings.TrimPrefix(fullMethod, "/")
+	parts := strings.Split(trimmed, "/")
+	if len(parts) == 2 {
+		return parts[0], parts[1]
+	}
+	return fullMethod, fullMethod
+}
+
+var sensitiveKeys = map[string]bool{
+	"password":      true,
+	"old_password":  true,
+	"new_password":  true,
+	"token":         true,
+	"refresh_token": true,
+	"access_token":  true,
+	"secret":        true,
+	"secret_key":    true,
+	"authorization": true,
+	"credit_card":   true,
+	"cvv":           true,
+	"card_number":   true,
+}
+
+func isSensitiveKey(key string) bool {
+	if sensitiveKeys[key] {
+		return true
+	}
+	for s := range sensitiveKeys {
+		if strings.Contains(key, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// sanitizePayload converts the request to a JSON-compatible map and redacts sensitive keys.
+func sanitizePayload(req any) any {
+	if req == nil {
+		return nil
+	}
+
+	var rawBytes []byte
+	var err error
+
+	if pm, ok := req.(proto.Message); ok {
+		rawBytes, err = protojson.Marshal(pm)
+	} else {
+		rawBytes, err = json.Marshal(req)
+	}
+	if err != nil {
+		return "[unserializable payload]"
+	}
+
+	var parsed any
+	if err := json.Unmarshal(rawBytes, &parsed); err != nil {
+		return "[invalid json payload]"
+	}
+
+	return maskSensitive(parsed)
+}
+
+func maskSensitive(v any) any {
+	switch val := v.(type) {
+	case map[string]any:
+		result := make(map[string]any, len(val))
+		for k, item := range val {
+			if isSensitiveKey(strings.ToLower(k)) {
+				result[k] = "[REDACTED]"
+			} else {
+				result[k] = maskSensitive(item)
+			}
+		}
+		return result
+	case []any:
+		result := make([]any, len(val))
+		for i, item := range val {
+			result[i] = maskSensitive(item)
+		}
+		return result
+	default:
+		return v
+	}
+}
