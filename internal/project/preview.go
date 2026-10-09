@@ -10,7 +10,7 @@ import (
 
 // Preview assembles source without queueing build validation or executing tools.
 // Generated files are explicitly marked, never presented as validated output.
-func (h *Projects) Preview(ctx context.Context, req ProjectRequest) (profile.Source, string, error) {
+func (h *Projects) assemblePreview(ctx context.Context, req ProjectRequest, snapshotID string) (profile.Source, string, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, "", err
 	}
@@ -37,9 +37,16 @@ func (h *Projects) Preview(ctx context.Context, req ProjectRequest) (profile.Sou
 		}
 		p, source = &stored.Plan, files
 	} else {
-		record, files, err := h.Active(ctx)
+		record, files, err := h.store.Read(ctx, snapshotID)
 		if err != nil {
 			return nil, "", err
+		}
+		valid, err := h.database.HasSnapshotValidation(ctx, snapshotID, validation.Key())
+		if err != nil {
+			return nil, "", err
+		}
+		if !valid || record.Status != "ready" {
+			return nil, "", ErrSnapshotUnavailable
 		}
 		p, err = plan.Build(files, record.Metadata.Identity(), req.Config)
 		if err != nil {

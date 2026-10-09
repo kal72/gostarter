@@ -31,8 +31,8 @@ are limited to 30 seconds.
 
 ## New migrations
 
-Add the next sequential pair, for example `000002_description.up.sql` and
-`000002_description.down.sql`. Do not edit an applied migration; create a new
+Add the next sequential pair, for example `000003_description.up.sql` and
+`000003_description.down.sql`. Do not edit an applied migration; create a new
 version. Keep multi-statement changes inside `BEGIN` / `COMMIT` where supported.
 Rebuild the binary to include new files.
 

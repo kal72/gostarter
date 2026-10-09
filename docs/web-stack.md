@@ -39,3 +39,29 @@ Public assets use content-derived ETags and `public, no-cache`; browser revalida
 Preview requests use AbortController and a request revision to discard obsolete results. Form edits and navigation abort the active request. Browser memory retains up to three preview results, bounded to approximately 8 MiB of serialized text and two minutes per entry. Keys include catalog snapshot, engine/template versions and configuration. This short-lived source preview cache is not authority for Generate; downloads retain full server validation.
 
 Recurring admin status requests are canceled while the document is hidden. Returning to a visible admin page triggers immediate status refresh. Explicit mutations are unaffected. Unit tests cover ETag responses, cache authority/settings invalidation, preview eviction/expiry and visibility behavior; live browser/network timing is not measured by those tests.
+
+## Concurrent Preview requests
+
+The project service uses single-flight to share source loading, planning and
+assembly for identical concurrent Preview requests. The key includes the pinned
+snapshot, complete request, engine version, template digest and validation key.
+Different snapshots or configurations remain independent. Completed results and
+errors are not cached by this mechanism; the existing browser cache remains.
+
+Each caller can cancel independently. Shared work uses a separate context with a
+15-second deadline, so the first caller disconnecting does not cancel followers.
+If all callers disconnect, that bounded work may still complete. Each response
+receives its own map and byte slices. Before returning, the service rechecks plan
+expiry, active snapshot selection (for configuration requests), snapshot readiness
+and validation authority. Generation and the validation queue are unchanged.
+
+## Sync during validation
+
+Admin Sync is disabled while any validation job has status `running`, including
+project validation jobs that are not listed in the snapshot panel. The overview
+exposes `validation_running`, and the server returns HTTP 409 with code
+`validation_running` for conflicting API requests. The check runs under the same
+PostgreSQL advisory transaction lock used by validation claims. Sync acquisition
+also checks running jobs, so an already queued manual request waits if validation
+starts before the worker acquires it. Completed, failed and queued validation jobs
+do not disable Sync. Existing duplicate-Sync protection remains in place.

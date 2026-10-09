@@ -155,6 +155,11 @@ func (h *APIHandler) uiStatus(w http.ResponseWriter, r *http.Request) {
 }
 func (h *APIHandler) uiSync(w http.ResponseWriter, r *http.Request) {
 	if err := h.upstream().Sync(r.Context()); err != nil {
+		if errors.Is(err, upstream.ErrValidationRunning) {
+			w.Header().Set("HX-Trigger", "admin-refresh")
+			renderHTML(w, r, 409, components.Notice("Validation is running. Wait until it finishes before syncing.", true))
+			return
+		}
 		if errors.Is(err, upstream.ErrSyncBusy) {
 			w.Header().Set("HX-Trigger", "admin-refresh")
 			renderHTML(w, r, 409, components.Notice("Sync is already queued or running.", true))

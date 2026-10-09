@@ -34,6 +34,9 @@ func SyncStatus(source Source) string {
 	if source.SyncRequested {
 		return "Sync queued"
 	}
+	if source.ValidationRunning {
+		return "Validation running · Sync unavailable"
+	}
 	return "Manual sync · idle"
 }
 func CanRollback(source Source, s Snapshot) bool {
@@ -46,6 +49,7 @@ type Source struct {
 	Repository, Ref, ActiveID, CandidateID, SyncError string
 	Revision, CandidateEpoch                          int64
 	SyncUntil                                         *time.Time
+	ValidationRunning                                 bool
 	SyncRequested                                     bool
 	Snapshots                                         []Snapshot
 }
@@ -55,5 +59,5 @@ type Snapshot struct {
 }
 
 func SyncBusy(source Source) bool {
-	return source.SyncRequested || source.SyncUntil != nil && source.SyncUntil.After(time.Now())
+	return source.ValidationRunning || source.SyncRequested || source.SyncUntil != nil && source.SyncUntil.After(time.Now())
 }

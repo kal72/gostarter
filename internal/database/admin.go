@@ -12,6 +12,9 @@ type AdminOverview = upstream.AdminOverview
 
 func (d *DB) AdminOverview(ctx context.Context, key string) (AdminOverview, error) {
 	out := AdminOverview{Snapshots: []AdminSnapshot{}}
+	if err := d.conn.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM validation_jobs WHERE status='running')`).Scan(&out.ValidationRunning); err != nil {
+		return out, err
+	}
 	state, err := d.GetUpstream(ctx, "primary")
 	if errors.Is(err, sql.ErrNoRows) {
 		settings, err := d.GetSettingsContext(ctx)

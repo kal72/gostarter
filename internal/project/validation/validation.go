@@ -5,11 +5,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -21,10 +21,10 @@ import (
 	"gostarter/internal/upstream/profile"
 )
 
-const Version = "1"
+const Version = "2"
 
 func Key() string {
-	s := sha256.Sum256([]byte("validation/" + Version + "/" + plan.EngineVersion + "/" + templates.Version + "/" + templates.Digest() + "/" + smokeFixture))
+	s := sha256.Sum256([]byte("validation/" + Version + "/" + plan.EngineVersion + "/" + templates.Version + "/" + templates.Digest() + "/" + smokeFixture + "/" + runtime.GOOS + "/" + runtime.GOARCH + "/" + runtime.Version()))
 	return hex.EncodeToString(s[:])
 }
 
@@ -32,6 +32,7 @@ type Result struct{ ContentSHA256, IdentitySHA256 string }
 type Engine struct {
 	WorkspaceDir string
 	MaxCases     int
+	CaseCache    CaseCache
 }
 
 func (e Engine) Plan(ctx context.Context, p *plan.Plan, files profile.Source) (Result, error) {
@@ -84,21 +85,46 @@ func (e Engine) Snapshot(ctx context.Context, id plan.Snapshot, files profile.So
 	if err != nil {
 		return Result{}, err
 	}
-	results := []Result{}
-	for _, p := range cases {
-		r, err := e.Plan(ctx, p, files)
+	execution := "uncached"
+	if e.CaseCache != nil {
+		execution, err = render.ValidationExecutionFingerprint(ctx, e.WorkspaceDir, cases[0])
 		if err != nil {
-			return Result{}, fmt.Errorf("%s %v: %w", p.Config.Protocol, p.Config.RequestedExtensions, err)
+			return Result{}, err
 		}
-		results = append(results, r)
 	}
-	data, err := json.Marshal(results)
+	run := e.Plan
+	if e.CaseCache != nil {
+		run = func(ctx context.Context, p *plan.Plan, files profile.Source) (Result, error) {
+			result, err := e.Plan(ctx, p, files)
+			if err != nil {
+				return Result{}, err
+			}
+			current, err := render.ValidationExecutionFingerprint(ctx, e.WorkspaceDir, p)
+			if err != nil {
+				return Result{}, err
+			}
+			if current != execution {
+				return Result{}, fmt.Errorf("validation execution environment changed")
+			}
+			return result, nil
+		}
+	}
+	result, err := validateCases(ctx, id, files, cases, execution, e.CaseCache, run)
 	if err != nil {
 		return Result{}, err
 	}
-	sum := sha256.Sum256(data)
-	return Result{plan.ContentDigest(files), hex.EncodeToString(sum[:])}, nil
+	if e.CaseCache != nil {
+		current, err := render.ValidationExecutionFingerprint(ctx, e.WorkspaceDir, cases[0])
+		if err != nil {
+			return Result{}, err
+		}
+		if current != execution {
+			return Result{}, fmt.Errorf("validation execution environment changed")
+		}
+	}
+	return result, nil
 }
+
 func (e Engine) smoke(ctx context.Context, p *plan.Plan, a *render.Artifact) (err error) {
 	stage, err := os.MkdirTemp(e.WorkspaceDir, "gostarter-smoke-")
 	if err != nil {

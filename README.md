@@ -300,6 +300,11 @@ See [application architecture](docs/application-architecture.md) for startup own
 
 The UI uses Chi, templ, HTMX, Alpine.js, and locally compiled Tailwind CSS. `make start` builds the frontend and starts the single application process. Use `make ui` after editing templates or styles. See [web stack and build ownership](docs/web-stack.md).
 
+### Incremental snapshot validation
+
+Snapshot validation supports [incremental case reuse](docs/incremental-validation.md)
+with bounded PostgreSQL evidence storage. Individual project validation remains full.
+
 ### GitHub API authentication and Sync limits
 
 Set `GITHUB_TOKEN` in the server environment or `.env` to authenticate GitHub API

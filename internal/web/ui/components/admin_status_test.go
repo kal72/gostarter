@@ -14,7 +14,7 @@ func TestSyncButtonTracksQueueAndLease(t *testing.T) {
 		name   string
 		source ui.Source
 		busy   bool
-	}{{"queued", ui.Source{SyncRequested: true}, true}, {"running", ui.Source{SyncUntil: &future}, true}, {"expired", ui.Source{SyncUntil: &past}, false}, {"idle", ui.Source{}, false}} {
+	}{{"queued", ui.Source{SyncRequested: true}, true}, {"running", ui.Source{SyncUntil: &future}, true}, {"expired", ui.Source{SyncUntil: &past}, false}, {"idle", ui.Source{}, false}, {"validation running", ui.Source{ValidationRunning: true}, true}} {
 		t.Run(tc.name, func(t *testing.T) {
 			var output strings.Builder
 			if err := AdminStats(tc.source).Render(context.Background(), &output); err != nil {

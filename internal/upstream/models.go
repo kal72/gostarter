@@ -25,16 +25,17 @@ type AdminSnapshot struct {
 	CreatedAt        time.Time `json:"created_at"`
 }
 type AdminOverview struct {
-	Repository     string          `json:"repository"`
-	Ref            string          `json:"ref"`
-	Revision       int64           `json:"revision"`
-	CandidateEpoch int64           `json:"candidate_epoch"`
-	ActiveID       string          `json:"active_snapshot_id"`
-	CandidateID    string          `json:"candidate_snapshot_id"`
-	SyncUntil      *time.Time      `json:"sync_until"`
-	SyncRequested  bool            `json:"sync_requested"`
-	SyncError      string          `json:"sync_error,omitempty"`
-	Snapshots      []AdminSnapshot `json:"snapshots"`
+	Repository        string          `json:"repository"`
+	Ref               string          `json:"ref"`
+	Revision          int64           `json:"revision"`
+	CandidateEpoch    int64           `json:"candidate_epoch"`
+	ActiveID          string          `json:"active_snapshot_id"`
+	CandidateID       string          `json:"candidate_snapshot_id"`
+	SyncUntil         *time.Time      `json:"sync_until"`
+	ValidationRunning bool            `json:"validation_running"`
+	SyncRequested     bool            `json:"sync_requested"`
+	SyncError         string          `json:"sync_error,omitempty"`
+	Snapshots         []AdminSnapshot `json:"snapshots"`
 }
 type SnapshotRecord struct {
 	Metadata  snapshot.Metadata

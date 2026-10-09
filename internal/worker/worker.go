@@ -43,7 +43,7 @@ func New(repository *database.DB, store *storage.Service, policy config.Validati
 	if err := os.MkdirAll(policy.WorkspaceDir, 0700); err != nil {
 		return nil, err
 	}
-	return &Worker{repository, store, policy, validation.Engine{WorkspaceDir: policy.WorkspaceDir, MaxCases: policy.MaxCases}}, nil
+	return &Worker{repository, store, policy, validation.Engine{WorkspaceDir: policy.WorkspaceDir, MaxCases: policy.MaxCases, CaseCache: repository}}, nil
 }
 
 // Run binds this deployment policy once, then starts a bounded set of claim loops.

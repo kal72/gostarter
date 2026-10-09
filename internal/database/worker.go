@@ -245,7 +245,7 @@ func (d *DB) AcquireSync(ctx context.Context, key string, duration time.Duration
 	if err != nil {
 		return lease, err
 	}
-	err = tx.QueryRowContext(ctx, `UPDATE upstream_state SET sync_token=$2,sync_until=clock_timestamp()+$3*interval '1 second',sync_requested=false,sync_manual_lease=true WHERE source_key=$1 AND (sync_until IS NULL OR sync_until<=clock_timestamp()) AND (sync_requested OR (sync_manual_lease AND sync_token IS NOT NULL AND sync_until<=clock_timestamp())) RETURNING source_key,repository,source_ref,revision,COALESCE(active_snapshot_id,''),COALESCE(candidate_snapshot_id,''),candidate_epoch`, key, token, duration.Seconds()).Scan(&lease.State.Key, &lease.State.Repository, &lease.State.Ref, &lease.State.Revision, &lease.State.ActiveSnapshotID, &lease.State.CandidateSnapshotID, &lease.State.CandidateEpoch)
+	err = tx.QueryRowContext(ctx, `UPDATE upstream_state SET sync_token=$2,sync_until=clock_timestamp()+$3*interval '1 second',sync_requested=false,sync_manual_lease=true WHERE source_key=$1 AND NOT EXISTS(SELECT 1 FROM validation_jobs WHERE status='running') AND (sync_until IS NULL OR sync_until<=clock_timestamp()) AND (sync_requested OR (sync_manual_lease AND sync_token IS NOT NULL AND sync_until<=clock_timestamp())) RETURNING source_key,repository,source_ref,revision,COALESCE(active_snapshot_id,''),COALESCE(candidate_snapshot_id,''),candidate_epoch`, key, token, duration.Seconds()).Scan(&lease.State.Key, &lease.State.Repository, &lease.State.Ref, &lease.State.Revision, &lease.State.ActiveSnapshotID, &lease.State.CandidateSnapshotID, &lease.State.CandidateEpoch)
 	if errors.Is(err, sql.ErrNoRows) {
 		if e := tx.Commit(); e != nil {
 			return lease, e
@@ -354,6 +354,13 @@ func (d *DB) RequestSync(ctx context.Context) error {
 		return err
 	}
 	defer tx.Rollback()
+	var running bool
+	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM validation_jobs WHERE status='running')`).Scan(&running); err != nil {
+		return err
+	}
+	if running {
+		return upstream.ErrValidationRunning
+	}
 	var repository, ref string
 	if err = tx.QueryRowContext(ctx, `SELECT (SELECT value FROM admin_settings WHERE key='upstream_repo'),(SELECT value FROM admin_settings WHERE key='upstream_branch')`).Scan(&repository, &ref); err != nil {
 		return err

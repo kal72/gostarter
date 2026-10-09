@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"errors"
+	"golang.org/x/sync/singleflight"
 	"gostarter/internal/project/plan"
 	"gostarter/internal/project/templates"
 	"gostarter/internal/project/validation"
@@ -37,6 +38,7 @@ type ProjectStorage interface {
 
 // Projects orchestrates immutable source selection, dependency resolution and validation.
 type Projects struct {
+	previewFlights   singleflight.Group
 	catalogMu        sync.Mutex
 	catalogCache     catalogEntry
 	database         ProjectRepository

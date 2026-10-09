@@ -29,7 +29,7 @@ func TestEmbeddedMigrationLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	version, dirty, err := runner.Version()
-	if err != nil || version != 1 || dirty {
+	if err != nil || version != 2 || dirty {
 		t.Fatalf("version=%d dirty=%v err=%v", version, dirty, err)
 	}
 	if err := runner.Up(); err != migrate.ErrNoChange {
@@ -59,15 +59,17 @@ func TestEmbeddedMigrationDirectionsNotEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer source.Close()
-	for _, read := range []func(uint) (io.ReadCloser, string, error){source.ReadUp, source.ReadDown} {
-		r, _, err := read(1)
-		if err != nil {
-			t.Fatal(err)
-		}
-		body, err := io.ReadAll(r)
-		r.Close()
-		if err != nil || len(body) == 0 {
-			t.Fatalf("empty or unreadable migration: %v", err)
+	for version := uint(1); version <= 2; version++ {
+		for _, read := range []func(uint) (io.ReadCloser, string, error){source.ReadUp, source.ReadDown} {
+			r, _, err := read(version)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err := io.ReadAll(r)
+			r.Close()
+			if err != nil || len(body) == 0 {
+				t.Fatalf("empty or unreadable migration: %v", err)
+			}
 		}
 	}
 }

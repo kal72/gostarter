@@ -91,6 +91,10 @@ func (h *APIHandler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.upstream().Sync(r.Context()); err != nil {
+		if errors.Is(err, upstream.ErrValidationRunning) {
+			problem(w, 409, "validation_running", "Validation is running. Wait until it finishes before syncing.")
+			return
+		}
 		if errors.Is(err, upstream.ErrSyncBusy) {
 			problem(w, 409, "sync_busy", "Sync is already queued or running")
 			return

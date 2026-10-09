@@ -123,6 +123,20 @@ func readTree(dir string) (profile.Source, error) {
 	return files, err
 }
 
+// ValidationExecutionFingerprint binds incremental evidence to actual tool binaries,
+// Go toolchain, protobuf includes and the controlled generation environment.
+func ValidationExecutionFingerprint(ctx context.Context, dir string, p *plan.Plan) (string, error) {
+	identity, err := executionIdentity(ctx, dir, p)
+	if err != nil {
+		return "", err
+	}
+	data, err := json.Marshal(identity)
+	if err != nil {
+		return "", err
+	}
+	return hashBytes(data), nil
+}
+
 func executionIdentity(ctx context.Context, dir string, p *plan.Plan) (ExecutionIdentity, error) {
 	out := ExecutionIdentity{Tools: map[string]ToolIdentity{}, Includes: map[string]string{}, Environment: plan.GenerationEnvironment(p.Config.GoVersion)}
 	env := environment(out.Environment)
